@@ -121,6 +121,7 @@ function getFlagUrl(code) {
         <img
           :src="getFlagUrl(country1.code)"
           :alt="country1.name + ' flag'"
+          loading="lazy"
           class="w-24 h-16 object-cover mx-auto rounded shadow mb-2"
         />
         <h2 class="text-xl font-bold">{{ country1.name }}</h2>
@@ -135,6 +136,7 @@ function getFlagUrl(code) {
         <img
           :src="getFlagUrl(country2.code)"
           :alt="country2.name + ' flag'"
+          loading="lazy"
           class="w-24 h-16 object-cover mx-auto rounded shadow mb-2"
         />
         <h2 class="text-xl font-bold">{{ country2.name }}</h2>

@@ -232,6 +232,7 @@ function handleBackdropClick(e) {
             <img
               :src="`https://flagcdn.com/w80/${country.code.toLowerCase()}.png`"
               :alt="country.name"
+              loading="lazy"
               class="tile-flag-img"
             />
           </template>
