@@ -82,12 +82,15 @@ function getFlagUrl(code) {
     <p class="text-base-content/60 mb-8">Select two countries to compare their key statistics side by side</p>
 
     <!-- Country Selectors -->
-    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8">
+    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8" role="group" aria-label="Country selection">
       <!-- Country 1 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country1-select" class="sr-only">Select first country</label>
         <select
+          id="country1-select"
           v-model="country1Code"
           class="select select-bordered w-full text-lg"
+          aria-label="First country to compare"
         >
           <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
             {{ c.name }}
@@ -96,17 +99,25 @@ function getFlagUrl(code) {
       </div>
 
       <!-- Swap Button -->
-      <button @click="swapCountries" class="btn btn-circle btn-ghost">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button
+        @click="swapCountries"
+        class="btn btn-circle btn-ghost"
+        aria-label="Swap countries"
+        title="Swap countries"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
         </svg>
       </button>
 
       <!-- Country 2 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country2-select" class="sr-only">Select second country</label>
         <select
+          id="country2-select"
           v-model="country2Code"
           class="select select-bordered w-full text-lg"
+          aria-label="Second country to compare"
         >
           <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
             {{ c.name }}
@@ -116,7 +127,7 @@ function getFlagUrl(code) {
     </div>
 
     <!-- Country Headers -->
-    <div v-if="country1 && country2" class="grid grid-cols-[1fr_auto_1fr] gap-4 mb-6">
+    <div v-if="country1 && country2" class="grid grid-cols-[1fr_auto_1fr] gap-4 mb-6" aria-live="polite">
       <div class="text-center">
         <img
           :src="getFlagUrl(country1.code)"
@@ -128,9 +139,10 @@ function getFlagUrl(code) {
         <p class="text-sm text-base-content/60">{{ country1.continent }}</p>
       </div>
 
-      <div class="flex items-center justify-center text-2xl font-bold text-base-content/30">
+      <div class="flex items-center justify-center text-2xl font-bold text-base-content/30" aria-hidden="true">
         VS
       </div>
+      <span class="sr-only">versus</span>
 
       <div class="text-center">
         <img
@@ -145,20 +157,29 @@ function getFlagUrl(code) {
     </div>
 
     <!-- Comparison Bars -->
-    <div v-if="country1 && country2" class="space-y-6">
+    <div v-if="country1 && country2" class="space-y-6" role="region" aria-label="Metric comparisons">
       <div
         v-for="metric in metrics"
         :key="metric.key"
         class="card bg-base-200 p-4"
+        role="group"
+        :aria-label="`${metric.label} comparison: ${country1.name} ${getComparison(metric).formatted1}, ${country2.name} ${getComparison(metric).formatted2}`"
       >
-        <div class="text-sm font-medium text-base-content/70 mb-2 text-center">
+        <div class="text-sm font-medium text-base-content/70 mb-2 text-center" :id="`metric-${metric.key}`">
           {{ metric.label }}
         </div>
 
         <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
           <!-- Country 1 Bar -->
           <div class="flex items-center gap-2">
-            <div class="flex-1 h-8 bg-base-300 rounded-lg overflow-hidden flex justify-end">
+            <div
+              class="flex-1 h-8 bg-base-300 rounded-lg overflow-hidden flex justify-end"
+              role="progressbar"
+              :aria-valuenow="getComparison(metric).pct1"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              :aria-label="`${country1.name}: ${getComparison(metric).formatted1}`"
+            >
               <div
                 class="h-full rounded-lg transition-all duration-500"
                 :class="getComparison(metric).winner === 1 ? 'bg-primary' : 'bg-base-content/30'"
@@ -168,13 +189,14 @@ function getFlagUrl(code) {
             <span
               class="font-mono text-sm w-20 text-right"
               :class="getComparison(metric).winner === 1 ? 'font-bold text-primary' : ''"
+              aria-hidden="true"
             >
               {{ getComparison(metric).formatted1 }}
             </span>
           </div>
 
           <!-- Ratio -->
-          <div class="w-16 text-center text-xs text-base-content/50">
+          <div class="w-16 text-center text-xs text-base-content/50" aria-hidden="true">
             {{ metric.unit }}
           </div>
 
@@ -183,10 +205,18 @@ function getFlagUrl(code) {
             <span
               class="font-mono text-sm w-20"
               :class="getComparison(metric).winner === 2 ? 'font-bold text-secondary' : ''"
+              aria-hidden="true"
             >
               {{ getComparison(metric).formatted2 }}
             </span>
-            <div class="flex-1 h-8 bg-base-300 rounded-lg overflow-hidden">
+            <div
+              class="flex-1 h-8 bg-base-300 rounded-lg overflow-hidden"
+              role="progressbar"
+              :aria-valuenow="getComparison(metric).pct2"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              :aria-label="`${country2.name}: ${getComparison(metric).formatted2}`"
+            >
               <div
                 class="h-full rounded-lg transition-all duration-500"
                 :class="getComparison(metric).winner === 2 ? 'bg-secondary' : 'bg-base-content/30'"
@@ -199,9 +229,9 @@ function getFlagUrl(code) {
     </div>
 
     <!-- Fun Facts -->
-    <div v-if="country1 && country2" class="mt-8 card bg-base-200 p-6">
-      <h3 class="font-bold mb-4">Quick Facts</h3>
-      <ul class="space-y-2 text-sm">
+    <div v-if="country1 && country2" class="mt-8 card bg-base-200 p-6" role="region" aria-labelledby="quick-facts-heading">
+      <h3 id="quick-facts-heading" class="font-bold mb-4">Quick Facts</h3>
+      <ul class="space-y-2 text-sm" role="list">
         <li v-if="getComparison(metrics[0]).ratio !== '-'">
           <span class="font-medium">{{ getComparison(metrics[0]).winner === 1 ? country1.name : country2.name }}</span>
           has {{ getComparison(metrics[0]).winner === 1 ? getComparison(metrics[0]).ratio : (country2.population / country1.population).toFixed(1) + 'x' }} more people
@@ -221,3 +251,17 @@ function getFlagUrl(code) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>

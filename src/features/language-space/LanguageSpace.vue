@@ -322,29 +322,49 @@ onUnmounted(() => {
         <h1 class="text-2xl font-bold">Language Embedding Space</h1>
         <p class="text-sm text-base-content/60">Languages positioned by linguistic similarity - like word embeddings, but for human languages</p>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2" role="group" aria-label="Visualization controls">
         <label class="label cursor-pointer gap-2">
-          <span class="label-text">Labels</span>
-          <input type="checkbox" v-model="showLabels" class="toggle toggle-sm" />
+          <span class="label-text" id="labels-toggle-label">Labels</span>
+          <input
+            type="checkbox"
+            v-model="showLabels"
+            class="toggle toggle-sm"
+            aria-labelledby="labels-toggle-label"
+          />
         </label>
         <label class="label cursor-pointer gap-2">
-          <span class="label-text">Connections</span>
-          <input type="checkbox" v-model="showConnections" class="toggle toggle-sm" />
+          <span class="label-text" id="connections-toggle-label">Connections</span>
+          <input
+            type="checkbox"
+            v-model="showConnections"
+            class="toggle toggle-sm"
+            aria-labelledby="connections-toggle-label"
+          />
         </label>
-        <button @click="resetView" class="btn btn-sm btn-ghost">Reset View</button>
+        <button @click="resetView" class="btn btn-sm btn-ghost" aria-label="Reset camera view to default position">Reset View</button>
       </div>
     </div>
 
     <div class="flex-1 flex overflow-hidden">
       <!-- 3D Canvas -->
-      <div ref="containerRef" class="flex-1 relative cursor-grab"></div>
+      <div
+        ref="containerRef"
+        class="flex-1 relative cursor-grab"
+        role="img"
+        aria-label="Interactive 3D visualization of language embeddings. Use mouse to rotate, scroll to zoom, click on language spheres to select."
+      >
+        <span class="sr-only">
+          This visualization shows {{ languages.length }} languages positioned in 3D space based on linguistic similarity.
+          Similar languages cluster together. Use the sidebar to explore language families and select specific languages.
+        </span>
+      </div>
 
       <!-- Side Panel -->
-      <div class="w-80 bg-base-200 p-4 space-y-4 overflow-y-auto">
+      <aside class="w-80 bg-base-200 p-4 space-y-4 overflow-y-auto" aria-label="Language details and filters">
         <!-- Selected Language Info -->
-        <div v-if="selectedLanguage" class="card bg-base-100 shadow">
+        <div v-if="selectedLanguage" class="card bg-base-100 shadow" aria-live="polite">
           <div class="card-body p-4">
-            <h3 class="card-title text-lg">{{ selectedLanguage.name }}</h3>
+            <h3 class="card-title text-lg" id="selected-language-title">{{ selectedLanguage.name }}</h3>
             <div class="badge" :style="{ backgroundColor: languageFamilies[selectedLanguage.family]?.color }">
               {{ selectedLanguage.family }}
             </div>
@@ -355,23 +375,27 @@ onUnmounted(() => {
               Subfamily: {{ selectedLanguage.subfamily }}
             </p>
 
-            <div class="divider text-xs">Nearest Neighbors</div>
-            <ul>
-              <li
-                v-for="neighbor in nearestNeighbors"
-                :key="neighbor.code"
-                @click="focusLanguage(neighbor)"
-                class="flex justify-between items-center text-sm hover:bg-base-200 p-1 rounded cursor-pointer"
-              >
-                <span>{{ neighbor.name }}</span>
-                <span class="text-xs opacity-50">{{ neighbor.distance.toFixed(1) }}</span>
+            <div class="divider text-xs" aria-hidden="true">Nearest Neighbors</div>
+            <h4 class="sr-only">Nearest neighbor languages</h4>
+            <ul role="list" aria-label="Languages most similar to the selected language">
+              <li v-for="neighbor in nearestNeighbors" :key="neighbor.code">
+                <button
+                  type="button"
+                  @click="focusLanguage(neighbor)"
+                  @keydown.enter="focusLanguage(neighbor)"
+                  class="w-full flex justify-between items-center text-sm hover:bg-base-200 p-1 rounded cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  :aria-label="`${neighbor.name}, distance ${neighbor.distance.toFixed(1)}. Click to focus.`"
+                >
+                  <span>{{ neighbor.name }}</span>
+                  <span class="text-xs opacity-50" aria-hidden="true">{{ neighbor.distance.toFixed(1) }}</span>
+                </button>
               </li>
             </ul>
           </div>
         </div>
 
         <!-- Hover Info -->
-        <div v-else-if="hoveredLanguage" class="card bg-base-100 shadow">
+        <div v-else-if="hoveredLanguage" class="card bg-base-100 shadow" aria-live="polite">
           <div class="card-body p-4">
             <h3 class="card-title text-lg">{{ hoveredLanguage.name }}</h3>
             <div class="badge" :style="{ backgroundColor: languageFamilies[hoveredLanguage.family]?.color }">
@@ -384,21 +408,25 @@ onUnmounted(() => {
         <!-- Family Filter -->
         <div class="card bg-base-100 shadow">
           <div class="card-body p-3">
-            <h3 class="card-title text-sm">Language Families</h3>
-            <div>
+            <h3 class="card-title text-sm" id="family-filter-title">Language Families</h3>
+            <div role="group" aria-labelledby="family-filter-title">
               <button
                 v-for="fam in familyList"
                 :key="fam.name"
+                type="button"
                 @click="selectedFamily = selectedFamily === fam.name ? null : fam.name"
-                class="w-full text-left py-1 px-2 rounded text-sm flex items-center gap-2 hover:bg-base-200 transition-colors"
+                class="w-full text-left py-1 px-2 rounded text-sm flex items-center gap-2 hover:bg-base-200 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 :class="{ 'bg-base-300': selectedFamily === fam.name }"
+                :aria-pressed="selectedFamily === fam.name"
+                :aria-label="`${fam.name} family, ${fam.count} languages. ${selectedFamily === fam.name ? 'Currently filtered.' : 'Click to filter.'}`"
               >
                 <span
                   class="w-3 h-3 rounded-full"
                   :style="{ backgroundColor: fam.color }"
+                  aria-hidden="true"
                 ></span>
                 <span class="flex-1">{{ fam.name }}</span>
-                <span class="text-xs opacity-50">{{ fam.count }}</span>
+                <span class="text-xs opacity-50" aria-hidden="true">{{ fam.count }}</span>
               </button>
             </div>
           </div>
@@ -408,7 +436,7 @@ onUnmounted(() => {
         <div class="card bg-base-100 shadow">
           <div class="card-body p-4">
             <h3 class="card-title text-sm">How to Read This</h3>
-            <ul class="text-xs space-y-2 text-base-content/70">
+            <ul class="text-xs space-y-2 text-base-content/70" role="list">
               <li><strong>Position:</strong> Similar languages cluster together, like word embeddings in neural networks</li>
               <li><strong>Size:</strong> Larger spheres = more speakers (log scale)</li>
               <li><strong>Color:</strong> Language family</li>
@@ -416,7 +444,7 @@ onUnmounted(() => {
             </ul>
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   </div>
 </template>
@@ -424,5 +452,17 @@ onUnmounted(() => {
 <style scoped>
 .card {
   border: 1px solid oklch(var(--bc) / 0.1);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

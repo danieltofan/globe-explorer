@@ -25,14 +25,14 @@ describe('HundredPeople', () => {
 
   it('renders exactly 100 dots', () => {
     const wrapper = mount(HundredPeople)
-    const dots = wrapper.findAll('.grid > div')
+    const dots = wrapper.findAll('.grid > button')
     expect(dots.length).toBe(100)
   })
 
   it('renders all 5 view mode buttons plus auto-play', () => {
     const wrapper = mount(HundredPeople)
-    const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBe(6) // 5 modes + 1 auto-play
+    const modeButtons = wrapper.findAll('.mode-btn')
+    expect(modeButtons.length).toBe(5) // 5 mode buttons
     expect(wrapper.text()).toContain('By Region')
     expect(wrapper.text()).toContain('By Income')
     expect(wrapper.text()).toContain('Internet Access')
@@ -74,18 +74,18 @@ describe('HundredPeople', () => {
 
   it('highlights dots on legend hover', async () => {
     const wrapper = mount(HundredPeople)
-    const legendItem = wrapper.findAll('.cursor-pointer').find(el => el.text().includes('Asia'))
+    const legendItem = wrapper.findAll('.legend-pill').find(el => el.text().includes('Asia'))
     await legendItem.trigger('mouseenter')
 
     // Check that hoveredGroup state is set (dots should have highlight class)
-    const dots = wrapper.findAll('.grid > div')
+    const dots = wrapper.findAll('.grid > button')
     const highlightedDots = dots.filter(d => d.classes().includes('dot-highlighted'))
     expect(highlightedDots.length).toBeGreaterThan(0)
   })
 
   it('shows info card on hover', async () => {
     const wrapper = mount(HundredPeople)
-    const legendItem = wrapper.findAll('.cursor-pointer').find(el => el.text().includes('Asia'))
+    const legendItem = wrapper.findAll('.legend-pill').find(el => el.text().includes('Asia'))
     await legendItem.trigger('mouseenter')
 
     expect(wrapper.text()).toContain('out of 100 people')
@@ -93,7 +93,7 @@ describe('HundredPeople', () => {
 
   it('clears highlight on mouse leave', async () => {
     const wrapper = mount(HundredPeople)
-    const legendItem = wrapper.findAll('.cursor-pointer').find(el => el.text().includes('Asia'))
+    const legendItem = wrapper.findAll('.legend-pill').find(el => el.text().includes('Asia'))
 
     await legendItem.trigger('mouseenter')
     await legendItem.trigger('mouseleave')
@@ -105,7 +105,7 @@ describe('HundredPeople', () => {
 
   it('dots have correct colors', () => {
     const wrapper = mount(HundredPeople)
-    const dots = wrapper.findAll('.grid > div')
+    const dots = wrapper.findAll('.grid > button')
 
     // Check that dots have background colors set
     dots.forEach(dot => {
@@ -116,7 +116,7 @@ describe('HundredPeople', () => {
 
   it('dots are interactive', () => {
     const wrapper = mount(HundredPeople)
-    const dots = wrapper.findAll('.grid > div')
+    const dots = wrapper.findAll('.grid > button')
 
     dots.forEach(dot => {
       expect(dot.classes()).toContain('cursor-pointer')

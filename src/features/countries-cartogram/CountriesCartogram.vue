@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { countries, colorModes, getTileSize, getFieldRange, getGradientColor, getTileDimensions, canvasWidth, canvasHeight } from './countries'
 
 const currentColorMode = ref('population')
 const hoveredCountry = ref(null)
 const selectedCountry = ref(null)
 const searchQuery = ref('')
+const modalRef = ref(null)
 
 // Responsive scaling - fit to container on large screens, allow scroll on small
 const containerRef = ref(null)
@@ -26,11 +27,20 @@ function updateScale() {
 onMounted(() => {
   updateScale()
   window.addEventListener('resize', updateScale)
+  window.addEventListener('keydown', handleGlobalKeydown)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateScale)
+  window.removeEventListener('keydown', handleGlobalKeydown)
 })
+
+// Handle Escape key to close modal
+function handleGlobalKeydown(e) {
+  if (e.key === 'Escape' && selectedCountry.value) {
+    closeDetail()
+  }
+}
 
 const currentMode = computed(() => colorModes.find(m => m.id === currentColorMode.value))
 
@@ -157,10 +167,25 @@ function closeDetail() {
   selectedCountry.value = null
 }
 
+// Open detail card and focus it
+async function openDetail(country) {
+  selectedCountry.value = country
+  await nextTick()
+  modalRef.value?.focus()
+}
+
 // Click outside to close
 function handleBackdropClick(e) {
   if (e.target.classList.contains('detail-backdrop')) {
     closeDetail()
+  }
+}
+
+// Keyboard handler for tiles
+function handleTileKeydown(event, country) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    openDetail(country)
   }
 }
 </script>
@@ -177,13 +202,15 @@ function handleBackdropClick(e) {
       <!-- Controls -->
       <div class="flex flex-wrap justify-center items-center gap-4 mb-8">
         <!-- Color Mode Selector -->
-        <div class="flex flex-wrap justify-center gap-2">
+        <div class="flex flex-wrap justify-center gap-2" role="group" aria-label="Color mode selection">
           <button
             v-for="mode in colorModes"
             :key="mode.id"
             @click="currentColorMode = mode.id"
             class="btn btn-sm mode-btn"
             :class="currentColorMode === mode.id ? 'btn-primary shadow-lg' : 'btn-ghost'"
+            :aria-pressed="currentColorMode === mode.id"
+            :aria-label="`View by ${mode.name}`"
           >
             {{ mode.name }}
           </button>
@@ -191,11 +218,14 @@ function handleBackdropClick(e) {
 
         <!-- Search -->
         <div class="form-control">
+          <label for="country-search" class="sr-only">Search countries</label>
           <input
+            id="country-search"
             v-model="searchQuery"
             type="text"
             placeholder="Search country..."
             class="input input-bordered input-sm w-40"
+            aria-label="Search countries by name or code"
           />
         </div>
       </div>
@@ -205,15 +235,18 @@ function handleBackdropClick(e) {
     <div ref="containerRef" class="world-canvas-container">
       <div
         class="world-canvas"
+        role="grid"
+        aria-label="World cartogram showing countries as tiles sized by land area"
         :style="{
           width: `${canvasWidth * scale}px`,
           height: `${canvasHeight * scale}px`
         }"
       >
         <!-- All countries as absolute positioned tiles -->
-        <div
+        <button
           v-for="country in countries"
           :key="country.code"
+          type="button"
           class="country-tile"
           :class="[
             getTileSizeClass(country.area),
@@ -224,25 +257,29 @@ function handleBackdropClick(e) {
             }
           ]"
           :style="getTileStyle(country)"
+          :aria-label="`${country.name}, ${continentNames[country.continent]}. Population: ${(country.population / 1000000).toFixed(1)} million. Click for details.`"
           @mouseenter="hoveredCountry = country.code"
           @mouseleave="hoveredCountry = null"
-          @click="selectedCountry = country"
+          @focus="hoveredCountry = country.code"
+          @blur="hoveredCountry = null"
+          @click="openDetail(country)"
+          @keydown="handleTileKeydown($event, country)"
         >
           <template v-if="currentColorMode === 'flags'">
             <img
               :src="`https://flagcdn.com/w80/${country.code.toLowerCase()}.png`"
-              :alt="country.name"
+              :alt="country.name + ' flag'"
               loading="lazy"
               class="tile-flag-img"
             />
           </template>
           <template v-else>
-            <span class="tile-code">{{ country.code }}</span>
+            <span class="tile-code" aria-hidden="true">{{ country.code }}</span>
           </template>
-          <span class="tile-name">{{ country.name }}</span>
+          <span class="tile-name" aria-hidden="true">{{ country.name }}</span>
 
-          <!-- Tooltip -->
-          <div class="tile-tooltip">
+          <!-- Tooltip (decorative, info repeated in aria-label) -->
+          <div class="tile-tooltip" aria-hidden="true">
             <div class="flex items-center gap-2 mb-2">
               <span class="text-2xl">{{ country.flag }}</span>
               <div>
@@ -261,14 +298,14 @@ function handleBackdropClick(e) {
               <span class="font-medium">{{ country.lifeExpectancy.toFixed(1) }} years</span>
             </div>
           </div>
-        </div>
+        </button>
       </div>
     </div>
 
     <!-- Color Legend -->
     <div class="container mx-auto px-4">
       <div v-if="currentColorMode !== 'flags'" class="mt-8 flex justify-center">
-        <div class="gradient-legend glass-card px-6 py-3 rounded-2xl">
+        <div class="gradient-legend glass-card px-6 py-3 rounded-2xl" role="img" :aria-label="`Color legend for ${currentMode.name}: darker colors indicate lower values, lighter colors indicate higher values`">
           <div class="flex items-center gap-4">
             <span class="text-sm opacity-70">Low</span>
             <div
@@ -276,6 +313,7 @@ function handleBackdropClick(e) {
               :style="{
                 background: `linear-gradient(to right, ${currentMode.gradient?.join(', ')})`
               }"
+              aria-hidden="true"
             />
             <span class="text-sm opacity-70">High</span>
           </div>
@@ -294,43 +332,55 @@ function handleBackdropClick(e) {
       <div
         v-if="selectedCountry"
         class="detail-backdrop"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="'modal-title-' + selectedCountry.code"
         @click="handleBackdropClick"
       >
-        <div class="detail-card glass-card" @click.stop>
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3" @click="closeDetail">
-            ✕
+        <div
+          ref="modalRef"
+          class="detail-card glass-card"
+          tabindex="-1"
+          @click.stop
+        >
+          <button
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
+            @click="closeDetail"
+            aria-label="Close country details"
+          >
+            <span aria-hidden="true">✕</span>
           </button>
 
           <div class="flex items-start gap-4 mb-6">
-            <span class="text-6xl">{{ selectedCountry.flag }}</span>
+            <span class="text-6xl" aria-hidden="true">{{ selectedCountry.flag }}</span>
             <div>
-              <h2 class="text-2xl font-bold">{{ selectedCountry.name }}</h2>
+              <h2 :id="'modal-title-' + selectedCountry.code" class="text-2xl font-bold">{{ selectedCountry.name }}</h2>
               <p class="opacity-70">{{ continentNames[selectedCountry.continent] }}</p>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="stat-card">
+          <div class="grid grid-cols-2 gap-4" role="list" aria-label="Country statistics">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">Population</div>
               <div class="stat-value">{{ (selectedCountry.population / 1000000).toFixed(1) }}M</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">Land Area</div>
               <div class="stat-value">{{ (selectedCountry.area / 1000).toFixed(0) }}K km²</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">GDP per Capita</div>
               <div class="stat-value">${{ selectedCountry.gdpPerCapita.toLocaleString() }}</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">Life Expectancy</div>
               <div class="stat-value">{{ selectedCountry.lifeExpectancy.toFixed(1) }} years</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">Internet Access</div>
               <div class="stat-value">{{ selectedCountry.internetPenetration }}%</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" role="listitem">
               <div class="stat-label">Pop. Density</div>
               <div class="stat-value">{{ (selectedCountry.population / selectedCountry.area).toFixed(1) }}/km²</div>
             </div>
@@ -338,38 +388,38 @@ function handleBackdropClick(e) {
 
           <!-- Comparison bars -->
           <div class="mt-6">
-            <h4 class="font-medium mb-3 opacity-70">Compared to World Average</h4>
-            <div class="space-y-3">
-              <div>
+            <h3 class="font-medium mb-3 opacity-70">Compared to World Average</h3>
+            <div class="space-y-3" role="list" aria-label="Comparison to world average">
+              <div role="listitem">
                 <div class="flex justify-between text-sm mb-1">
                   <span>GDP per Capita</span>
                   <span>{{ Math.round((selectedCountry.gdpPerCapita / 12000) * 100) }}%</span>
                 </div>
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" :aria-valuenow="Math.min(100, Math.round((selectedCountry.gdpPerCapita / 12000) * 100))" aria-valuemin="0" aria-valuemax="100" :aria-label="`GDP per capita: ${Math.round((selectedCountry.gdpPerCapita / 12000) * 100)}% of world average`">
                   <div
                     class="progress-fill bg-success"
                     :style="{ width: `${Math.min(100, (selectedCountry.gdpPerCapita / 12000) * 100)}%` }"
                   />
                 </div>
               </div>
-              <div>
+              <div role="listitem">
                 <div class="flex justify-between text-sm mb-1">
                   <span>Life Expectancy</span>
                   <span>{{ Math.round((selectedCountry.lifeExpectancy / 73) * 100) }}%</span>
                 </div>
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" :aria-valuenow="Math.min(100, Math.round((selectedCountry.lifeExpectancy / 73) * 100))" aria-valuemin="0" aria-valuemax="100" :aria-label="`Life expectancy: ${Math.round((selectedCountry.lifeExpectancy / 73) * 100)}% of world average`">
                   <div
                     class="progress-fill bg-info"
                     :style="{ width: `${Math.min(100, (selectedCountry.lifeExpectancy / 73) * 100)}%` }"
                   />
                 </div>
               </div>
-              <div>
+              <div role="listitem">
                 <div class="flex justify-between text-sm mb-1">
                   <span>Internet Access</span>
                   <span>{{ Math.round((selectedCountry.internetPenetration / 63) * 100) }}%</span>
                 </div>
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" :aria-valuenow="Math.min(100, Math.round((selectedCountry.internetPenetration / 63) * 100))" aria-valuemin="0" aria-valuemax="100" :aria-label="`Internet access: ${Math.round((selectedCountry.internetPenetration / 63) * 100)}% of world average`">
                   <div
                     class="progress-fill bg-secondary"
                     :style="{ width: `${Math.min(100, (selectedCountry.internetPenetration / 63) * 100)}%` }"
@@ -385,6 +435,19 @@ function handleBackdropClick(e) {
 </template>
 
 <style scoped>
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Header gradient text */
 .header-gradient {
   background: linear-gradient(135deg, oklch(var(--p)) 0%, oklch(var(--s)) 100%);
@@ -449,6 +512,13 @@ function handleBackdropClick(e) {
   z-index: 1;
 }
 
+/* Focus indicator for tiles */
+.country-tile:focus-visible {
+  outline: 3px solid oklch(var(--p));
+  outline-offset: 2px;
+  z-index: 101 !important;
+}
+
 /* Tile sizes - font scaling with minimum for legibility */
 .tile-xxl { font-size: 1rem; }
 .tile-xl { font-size: 0.9rem; }
@@ -495,7 +565,8 @@ function handleBackdropClick(e) {
 }
 
 .tile-hovered,
-.country-tile:hover {
+.country-tile:hover,
+.country-tile:focus {
   transform: translate(-50%, -50%) scale(1.3);
   z-index: 100 !important;
   box-shadow: 0 8px 24px oklch(var(--bc) / 0.4);
@@ -554,6 +625,10 @@ function handleBackdropClick(e) {
   border-radius: 1.5rem;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+.detail-card:focus {
+  outline: none;
 }
 
 .stat-card {
