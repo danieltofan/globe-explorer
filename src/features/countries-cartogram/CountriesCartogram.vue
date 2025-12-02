@@ -235,7 +235,7 @@ function handleTileKeydown(event, country) {
     <div ref="containerRef" class="world-canvas-container">
       <div
         class="world-canvas"
-        role="grid"
+        role="img"
         aria-label="World cartogram showing countries as tiles sized by land area"
         :style="{
           width: `${canvasWidth * scale}px`,

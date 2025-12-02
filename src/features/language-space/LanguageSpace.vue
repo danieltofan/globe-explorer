@@ -364,7 +364,7 @@ onUnmounted(() => {
         <!-- Selected Language Info -->
         <div v-if="selectedLanguage" class="card bg-base-100 shadow" aria-live="polite">
           <div class="card-body p-4">
-            <h3 class="card-title text-lg" id="selected-language-title">{{ selectedLanguage.name }}</h3>
+            <h2 class="card-title text-lg" id="selected-language-title">{{ selectedLanguage.name }}</h2>
             <div class="badge" :style="{ backgroundColor: languageFamilies[selectedLanguage.family]?.color }">
               {{ selectedLanguage.family }}
             </div>
@@ -376,7 +376,7 @@ onUnmounted(() => {
             </p>
 
             <div class="divider text-xs" aria-hidden="true">Nearest Neighbors</div>
-            <h4 class="sr-only">Nearest neighbor languages</h4>
+            <h3 class="sr-only">Nearest neighbor languages</h3>
             <ul role="list" aria-label="Languages most similar to the selected language">
               <li v-for="neighbor in nearestNeighbors" :key="neighbor.code">
                 <button
@@ -397,7 +397,7 @@ onUnmounted(() => {
         <!-- Hover Info -->
         <div v-else-if="hoveredLanguage" class="card bg-base-100 shadow" aria-live="polite">
           <div class="card-body p-4">
-            <h3 class="card-title text-lg">{{ hoveredLanguage.name }}</h3>
+            <h2 class="card-title text-lg">{{ hoveredLanguage.name }}</h2>
             <div class="badge" :style="{ backgroundColor: languageFamilies[hoveredLanguage.family]?.color }">
               {{ hoveredLanguage.family }}
             </div>
@@ -408,7 +408,7 @@ onUnmounted(() => {
         <!-- Family Filter -->
         <div class="card bg-base-100 shadow">
           <div class="card-body p-3">
-            <h3 class="card-title text-sm" id="family-filter-title">Language Families</h3>
+            <h2 class="card-title text-sm" id="family-filter-title">Language Families</h2>
             <div role="group" aria-labelledby="family-filter-title">
               <button
                 v-for="fam in familyList"
@@ -435,7 +435,7 @@ onUnmounted(() => {
         <!-- Legend -->
         <div class="card bg-base-100 shadow">
           <div class="card-body p-4">
-            <h3 class="card-title text-sm">How to Read This</h3>
+            <h2 class="card-title text-sm">How to Read This</h2>
             <ul class="text-xs space-y-2 text-base-content/70" role="list">
               <li><strong>Position:</strong> Similar languages cluster together, like word embeddings in neural networks</li>
               <li><strong>Size:</strong> Larger spheres = more speakers (log scale)</li>

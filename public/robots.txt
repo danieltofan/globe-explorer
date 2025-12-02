@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://globe-explorer.codecrank.ai/sitemap.xml

@@ -196,8 +196,8 @@ function handleLegendKeydown(event, groupId) {
     <div class="glass-card rounded-3xl p-8 mb-8">
       <div
         class="grid grid-cols-10 gap-2 max-w-md mx-auto"
-        role="grid"
-        aria-label="100 people visualization grid"
+        role="img"
+        aria-label="100 people visualization grid showing world population distribution"
       >
         <button
           v-for="(dot, index) in dots"
@@ -237,7 +237,7 @@ function handleLegendKeydown(event, groupId) {
         :class="{ 'legend-pill-active': hoveredGroup === group.id }"
         :style="{ '--legend-color': group.color }"
         :aria-pressed="hoveredGroup === group.id"
-        :aria-label="`${group.name}: ${group.people} people`"
+        :aria-label="`${group.name}, ${group.people} people. Click to highlight.`"
         @mouseenter="hoveredGroup = group.id"
         @mouseleave="hoveredGroup = null"
         @focus="hoveredGroup = group.id"
