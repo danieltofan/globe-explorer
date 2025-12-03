@@ -549,10 +549,15 @@ function handleTileKeydown(event, country) {
   display: none;
 }
 
-/* Hide all tile names on mobile - too small to read */
+/* Mobile: minimum 12px font for legibility, hide names */
 @media (max-width: 768px) {
   .tile-name {
     display: none;
+  }
+  .tile-xs,
+  .tile-s,
+  .tile-m {
+    font-size: 0.75rem; /* 12px minimum */
   }
 }
 
