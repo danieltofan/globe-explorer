@@ -157,6 +157,11 @@ function getTileStyle(country) {
 
   if (textColor) {
     style.color = textColor
+    // Adaptive text shadow for contrast - opposite of text color
+    const shadowColor = textColor === '#ffffff'
+      ? 'rgba(0,0,0,0.8)'
+      : 'rgba(255,255,255,0.9)'
+    style.textShadow = `0 1px 2px ${shadowColor}, 0 0 4px ${shadowColor}`
   }
 
   return style
@@ -541,19 +546,16 @@ function handleTileKeydown(event, country) {
 /* Tile content */
 .tile-code {
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 
 .tile-name {
   font-size: 0.5em;
-  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 95%;
   line-height: 1.2;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .tile-flag-img {
