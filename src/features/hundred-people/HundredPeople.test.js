@@ -76,9 +76,9 @@ describe('HundredPeople', () => {
     const legendItem = wrapper.findAll('.cursor-pointer').find(el => el.text().includes('Asia'))
     await legendItem.trigger('mouseenter')
 
-    // Check that hoveredGroup state is set (dots should have opacity changes)
+    // Check that hoveredGroup state is set (dots should have highlight class)
     const dots = wrapper.findAll('.grid > div')
-    const highlightedDots = dots.filter(d => d.classes().includes('ring-2'))
+    const highlightedDots = dots.filter(d => d.classes().includes('dot-highlighted'))
     expect(highlightedDots.length).toBeGreaterThan(0)
   })
 
