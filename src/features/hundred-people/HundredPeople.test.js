@@ -1,8 +1,23 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import HundredPeople from './HundredPeople.vue'
 
+// Helper to wait for animation to complete
+const waitForAnimation = async () => {
+  // Animation takes ~950ms total (450ms out + 50ms shuffle + 450ms in)
+  vi.advanceTimersByTime(1000)
+  await Promise.resolve() // Allow Vue to process
+}
+
 describe('HundredPeople', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('renders the title', () => {
     const wrapper = mount(HundredPeople)
     expect(wrapper.text()).toContain('The World as 100 People')
@@ -40,6 +55,7 @@ describe('HundredPeople', () => {
     const wrapper = mount(HundredPeople)
     const incomeButton = wrapper.findAll('button').find(b => b.text() === 'By Income')
     await incomeButton.trigger('click')
+    await waitForAnimation()
     expect(wrapper.text()).toContain('How much do people earn?')
   })
 
@@ -103,7 +119,7 @@ describe('HundredPeople', () => {
 
     dots.forEach(dot => {
       expect(dot.classes()).toContain('cursor-pointer')
-      expect(dot.classes()).toContain('transition-all')
+      expect(dot.classes()).toContain('dot-animate')
     })
   })
 

@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { viewModes } from '@/shared/data/regions'
 
 const currentMode = ref('region')
 const hoveredGroup = ref(null)
+const isTransitioning = ref(false)
+const transitionPhase = ref('idle') // 'idle' | 'out' | 'shuffle' | 'in'
 
 const currentView = computed(() => {
   return viewModes.find(m => m.id === currentMode.value)
@@ -29,8 +31,42 @@ const dots = computed(() => {
   return result
 })
 
+// Calculate staggered delay for each dot (wave pattern from top-left to bottom-right)
+function getDotDelay(index) {
+  const row = Math.floor(index / 10)
+  const col = index % 10
+  // Diagonal wave: delay based on row + col
+  const diagonalIndex = row + col
+  // Max diagonal is 18 (row 9 + col 9), spread over ~200ms for snappier feel
+  return diagonalIndex * 11
+}
+
+// Track previous mode for transition
+const previousMode = ref('region')
+
 function setMode(modeId) {
-  currentMode.value = modeId
+  if (modeId === currentMode.value || isTransitioning.value) return
+
+  previousMode.value = currentMode.value
+  isTransitioning.value = true
+  transitionPhase.value = 'out'
+
+  // Phase 1: Dots shrink/fade out (~200ms spread + 300ms animation)
+  setTimeout(() => {
+    transitionPhase.value = 'shuffle'
+    currentMode.value = modeId
+
+    // Phase 2: Brief pause, then dots grow back in
+    setTimeout(() => {
+      transitionPhase.value = 'in'
+
+      // Phase 3: Animation complete (~200ms spread + 300ms animation + buffer)
+      setTimeout(() => {
+        transitionPhase.value = 'idle'
+        isTransitioning.value = false
+      }, 550)
+    }, 30)
+  }, 550) // Wait for slowest dot to shrink (200ms delay + 300ms duration + buffer)
 }
 </script>
 
@@ -59,13 +95,19 @@ function setMode(modeId) {
     <div class="bg-base-200 rounded-2xl p-6 mb-8">
       <div class="grid grid-cols-10 gap-2 max-w-md mx-auto">
         <div
-          v-for="dot in dots"
+          v-for="(dot, index) in dots"
           :key="dot.id"
-          class="aspect-square rounded-full transition-all duration-300 cursor-pointer hover:scale-125 hover:z-10"
-          :style="{ backgroundColor: dot.color }"
+          class="aspect-square rounded-full cursor-pointer dot-animate"
+          :style="{
+            backgroundColor: dot.color,
+            transitionDelay: `${getDotDelay(index)}ms`
+          }"
           :class="{
             'opacity-30': hoveredGroup && hoveredGroup !== dot.group,
-            'ring-2 ring-white ring-offset-2 ring-offset-base-200': hoveredGroup === dot.group
+            'ring-2 ring-white ring-offset-2 ring-offset-base-200': hoveredGroup === dot.group,
+            'dot-out': transitionPhase === 'out',
+            'dot-in': transitionPhase === 'in' || transitionPhase === 'shuffle',
+            'dot-idle': transitionPhase === 'idle'
           }"
           @mouseenter="hoveredGroup = dot.group"
           @mouseleave="hoveredGroup = null"
@@ -118,3 +160,31 @@ function setMode(modeId) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.dot-animate {
+  transition-property: transform, opacity, background-color, box-shadow;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dot-idle {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.dot-idle:hover {
+  transform: scale(1.25);
+  z-index: 10;
+}
+
+.dot-out {
+  transform: scale(0.3);
+  opacity: 0.4;
+}
+
+.dot-in {
+  transform: scale(1);
+  opacity: 1;
+}
+</style>
