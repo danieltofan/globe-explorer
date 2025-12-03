@@ -549,6 +549,13 @@ function handleTileKeydown(event, country) {
   display: none;
 }
 
+/* Hide all tile names on mobile - too small to read */
+@media (max-width: 768px) {
+  .tile-name {
+    display: none;
+  }
+}
+
 /* Tile content */
 .tile-code {
   font-weight: 700;
