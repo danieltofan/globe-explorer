@@ -543,6 +543,12 @@ function handleTileKeydown(event, country) {
 .tile-s { font-size: 0.65rem; }
 .tile-xs { font-size: 0.6rem; }
 
+/* Hide text on smallest tiles - too small to read, info in aria-label */
+.tile-xs .tile-name,
+.tile-s .tile-name {
+  display: none;
+}
+
 /* Tile content */
 .tile-code {
   font-weight: 700;
