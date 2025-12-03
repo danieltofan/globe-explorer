@@ -512,6 +512,17 @@ function handleTileKeydown(event, country) {
   z-index: 1;
 }
 
+/* Expand touch target to minimum 24x24px for small tiles */
+.country-tile::before {
+  content: '';
+  position: absolute;
+  min-width: 24px;
+  min-height: 24px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 /* Focus indicator for tiles */
 .country-tile:focus-visible {
   outline: 3px solid oklch(var(--p));
