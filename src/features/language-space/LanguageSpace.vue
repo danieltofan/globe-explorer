@@ -387,7 +387,7 @@ onUnmounted(() => {
                   :aria-label="`${neighbor.name}, distance ${neighbor.distance.toFixed(1)}. Click to focus.`"
                 >
                   <span>{{ neighbor.name }}</span>
-                  <span class="text-xs opacity-50" aria-hidden="true">{{ neighbor.distance.toFixed(1) }}</span>
+                  <span class="text-xs opacity-90" aria-hidden="true">{{ neighbor.distance.toFixed(1) }}</span>
                 </button>
               </li>
             </ul>
@@ -426,7 +426,7 @@ onUnmounted(() => {
                   aria-hidden="true"
                 ></span>
                 <span class="flex-1">{{ fam.name }}</span>
-                <span class="text-xs opacity-50" aria-hidden="true">{{ fam.count }}</span>
+                <span class="text-xs opacity-90" aria-hidden="true">{{ fam.count }}</span>
               </button>
             </div>
           </div>
