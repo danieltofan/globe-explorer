@@ -320,7 +320,7 @@ onUnmounted(() => {
     <div class="bg-base-200 px-4 py-3 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold">Language Embedding Space</h1>
-        <p class="text-sm text-base-content/60">Languages positioned by linguistic similarity - like word embeddings, but for human languages</p>
+        <p class="text-sm text-base-content/80">Languages positioned by linguistic similarity - like word embeddings, but for human languages</p>
       </div>
       <div class="flex gap-2" role="group" aria-label="Visualization controls">
         <label class="label cursor-pointer gap-2">
@@ -368,10 +368,10 @@ onUnmounted(() => {
             <div class="badge" :style="{ backgroundColor: languageFamilies[selectedLanguage.family]?.color }">
               {{ selectedLanguage.family }}
             </div>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-base-content/80">
               {{ selectedLanguage.speakers >= 1 ? selectedLanguage.speakers.toFixed(0) : selectedLanguage.speakers.toFixed(2) }}M speakers
             </p>
-            <p v-if="selectedLanguage.subfamily" class="text-xs text-base-content/50">
+            <p v-if="selectedLanguage.subfamily" class="text-xs text-base-content/70">
               Subfamily: {{ selectedLanguage.subfamily }}
             </p>
 
@@ -436,7 +436,7 @@ onUnmounted(() => {
         <div class="card bg-base-100 shadow">
           <div class="card-body p-4">
             <h2 class="card-title text-sm">How to Read This</h2>
-            <ul class="text-xs space-y-2 text-base-content/70" role="list">
+            <ul class="text-xs space-y-2 text-base-content/80" role="list">
               <li><strong>Position:</strong> Similar languages cluster together, like word embeddings in neural networks</li>
               <li><strong>Size:</strong> Larger spheres = more speakers (log scale)</li>
               <li><strong>Color:</strong> Language family</li>

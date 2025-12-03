@@ -141,16 +141,16 @@ function handleLegendKeydown(event, groupId) {
     <!-- Header -->
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold mb-2 header-gradient">The World as 100 People</h1>
-      <p class="text-lg text-base-content/70">{{ currentView.description }}</p>
+      <p class="text-lg text-base-content/80">{{ currentView.description }}</p>
     </div>
 
     <!-- Storytelling Fact Card -->
     <div v-if="isStorytelling" class="mb-8" aria-live="polite" aria-atomic="true">
       <div class="story-card text-center px-6 py-8 rounded-3xl max-w-lg mx-auto">
-        <p class="text-base-content/60 text-sm mb-2 uppercase tracking-wide">If the world were 100 people...</p>
+        <p class="text-base-content/80 text-sm mb-2 uppercase tracking-wide">If the world were 100 people...</p>
         <p class="text-5xl font-black mb-2 number-highlight">{{ currentFact.number }}</p>
         <p class="text-xl font-medium mb-3">{{ currentFact.text }}</p>
-        <p class="text-base-content/60 text-sm">{{ currentFact.subtext }}</p>
+        <p class="text-base-content/80 text-sm">{{ currentFact.subtext }}</p>
         <div class="flex justify-center gap-1 mt-6" role="tablist" aria-label="Story progress">
           <span
             v-for="(fact, i) in storyFacts"
@@ -275,7 +275,7 @@ function handleLegendKeydown(event, groupId) {
     </div>
 
     <!-- Explanation -->
-    <div class="mt-12 text-center text-base-content/50">
+    <div class="mt-12 text-center text-base-content/70">
       <p class="text-sm">Each dot represents approximately 80 million real people.</p>
       <p class="text-xs mt-1">Hover over dots or legend items to explore, or use keyboard to navigate.</p>
     </div>

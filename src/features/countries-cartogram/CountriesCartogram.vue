@@ -196,7 +196,7 @@ function handleTileKeydown(event, country) {
     <div class="container mx-auto px-4">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold mb-2 header-gradient" style="line-height: 1.3;">World Cartogram</h1>
-        <p class="text-lg text-base-content/70">{{ currentMode.description }}</p>
+        <p class="text-lg text-base-content/80">{{ currentMode.description }}</p>
       </div>
 
       <!-- Controls -->
@@ -322,7 +322,7 @@ function handleTileKeydown(event, country) {
       </div>
 
       <!-- Stats -->
-      <div class="mt-8 text-center text-base-content/50">
+      <div class="mt-8 text-center text-base-content/70">
         <p class="text-sm">{{ countries.length }} countries • Tile size = land area • Click for details</p>
       </div>
     </div>

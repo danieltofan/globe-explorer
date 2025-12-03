@@ -79,7 +79,7 @@ function getFlagUrl(code) {
 <template>
   <div class="container mx-auto px-4 py-8 max-w-5xl">
     <h1 class="text-3xl font-bold mb-2">Compare Countries</h1>
-    <p class="text-base-content/60 mb-8">Select two countries to compare their key statistics side by side</p>
+    <p class="text-base-content/80 mb-8">Select two countries to compare their key statistics side by side</p>
 
     <!-- Country Selectors -->
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8" role="group" aria-label="Country selection">
@@ -136,7 +136,7 @@ function getFlagUrl(code) {
           class="w-24 h-16 object-cover mx-auto rounded shadow mb-2"
         />
         <h2 class="text-xl font-bold">{{ country1.name }}</h2>
-        <p class="text-sm text-base-content/60">{{ country1.continent }}</p>
+        <p class="text-sm text-base-content/80">{{ country1.continent }}</p>
       </div>
 
       <div class="flex items-center justify-center text-2xl font-bold text-base-content/30" aria-hidden="true">
@@ -152,7 +152,7 @@ function getFlagUrl(code) {
           class="w-24 h-16 object-cover mx-auto rounded shadow mb-2"
         />
         <h2 class="text-xl font-bold">{{ country2.name }}</h2>
-        <p class="text-sm text-base-content/60">{{ country2.continent }}</p>
+        <p class="text-sm text-base-content/80">{{ country2.continent }}</p>
       </div>
     </div>
 
@@ -165,7 +165,7 @@ function getFlagUrl(code) {
         role="group"
         :aria-label="`${metric.label} comparison: ${country1.name} ${getComparison(metric).formatted1}, ${country2.name} ${getComparison(metric).formatted2}`"
       >
-        <div class="text-sm font-medium text-base-content/70 mb-2 text-center" :id="`metric-${metric.key}`">
+        <div class="text-sm font-medium text-base-content/80 mb-2 text-center" :id="`metric-${metric.key}`">
           {{ metric.label }}
         </div>
 
@@ -196,7 +196,7 @@ function getFlagUrl(code) {
           </div>
 
           <!-- Ratio -->
-          <div class="w-16 text-center text-xs text-base-content/50" aria-hidden="true">
+          <div class="w-16 text-center text-xs text-base-content/70" aria-hidden="true">
             {{ metric.unit }}
           </div>
 
