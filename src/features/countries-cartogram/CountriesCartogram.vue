@@ -307,7 +307,7 @@ function handleTileKeydown(event, country) {
       <div v-if="currentColorMode !== 'flags'" class="mt-8 flex justify-center">
         <div class="gradient-legend glass-card px-6 py-3 rounded-2xl" role="img" :aria-label="`Color legend for ${currentMode.name}: darker colors indicate lower values, lighter colors indicate higher values`">
           <div class="flex items-center gap-4">
-            <span class="text-sm opacity-70">Low</span>
+            <span class="text-sm" aria-hidden="true">Low</span>
             <div
               class="gradient-bar"
               :style="{
@@ -315,15 +315,15 @@ function handleTileKeydown(event, country) {
               }"
               aria-hidden="true"
             />
-            <span class="text-sm opacity-70">High</span>
+            <span class="text-sm" aria-hidden="true">High</span>
           </div>
-          <div class="text-center text-xs mt-1 opacity-50">{{ currentMode.name }}</div>
+          <div class="text-center text-xs mt-1" aria-hidden="true">{{ currentMode.name }}</div>
         </div>
       </div>
 
       <!-- Stats -->
-      <div class="mt-8 text-center text-base-content/70">
-        <p class="text-sm">{{ countries.length }} countries • Tile size = land area • Click for details</p>
+      <div class="mt-8 text-center">
+        <p class="text-sm text-base-content/90">{{ countries.length }} countries • Tile size = land area • Click for details</p>
       </div>
     </div>
 

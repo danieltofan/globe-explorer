@@ -268,16 +268,16 @@ function handleLegendKeydown(event, groupId) {
           <template v-else>are</template>
           <strong> {{ currentView.data.find(g => g.id === hoveredGroup)?.name }}</strong>
           <template v-if="currentView.data.find(g => g.id === hoveredGroup)?.description">
-            <br><span class="text-sm opacity-70">{{ currentView.data.find(g => g.id === hoveredGroup)?.description }}</span>
+            <br><span class="text-sm text-base-content/80">{{ currentView.data.find(g => g.id === hoveredGroup)?.description }}</span>
           </template>
         </span>
       </div>
     </div>
 
     <!-- Explanation -->
-    <div class="mt-12 text-center text-base-content/70">
-      <p class="text-sm">Each dot represents approximately 80 million real people.</p>
-      <p class="text-xs mt-1">Hover over dots or legend items to explore, or use keyboard to navigate.</p>
+    <div class="mt-12 text-center">
+      <p class="text-sm text-base-content/90">Each dot represents approximately 80 million real people.</p>
+      <p class="text-xs mt-1 text-base-content/80">Hover over dots or legend items to explore, or use keyboard to navigate.</p>
     </div>
   </div>
 </template>
