@@ -9,12 +9,15 @@ export const regions = [
   { id: 'oceania', name: 'Oceania', population: 46000000, color: '#06b6d4', people: 1 }
 ]
 
-// Income distribution (World Bank classifications)
+// Income distribution (World Bank + wealth data, displayed as daily income)
+// Sources: World Bank income classifications, Credit Suisse Global Wealth Report
 export const incomeGroups = [
-  { id: 'high', name: 'High Income', people: 16, color: '#22c55e', description: 'More than $14,005/year' },
-  { id: 'upper-middle', name: 'Upper Middle', people: 34, color: '#3b82f6', description: '$4,516 - $14,005/year' },
-  { id: 'lower-middle', name: 'Lower Middle', people: 40, color: '#eab308', description: '$1,146 - $4,515/year' },
-  { id: 'low', name: 'Low Income', people: 10, color: '#ef4444', description: 'Less than $1,146/year' }
+  { id: 'wealthy', name: 'Wealthy', people: 1, color: '#fbbf24', description: 'Top 1% — more than $150/day' },
+  { id: 'high', name: 'High Income', people: 9, color: '#22c55e', description: '$38 - $150/day' },
+  { id: 'upper-middle', name: 'Upper Middle', people: 24, color: '#3b82f6', description: '$12 - $38/day' },
+  { id: 'lower-middle', name: 'Lower Middle', people: 40, color: '#eab308', description: '$3 - $12/day' },
+  { id: 'low', name: 'Low Income', people: 17, color: '#f97316', description: '$2 - $3/day' },
+  { id: 'extreme-poverty', name: 'Extreme Poverty', people: 9, color: '#ef4444', description: 'Less than $2/day' }
 ]
 
 // Internet access
@@ -43,4 +46,18 @@ export const viewModes = [
   { id: 'internet', name: 'Internet Access', data: internetAccess, description: 'Who is connected?' },
   { id: 'urban', name: 'Urban vs Rural', data: urbanRural, description: 'City or countryside?' },
   { id: 'age', name: 'By Age', data: ageGroups, description: 'How old are people?' }
+]
+
+// Storytelling facts - curated for shareability
+export const storyFacts = [
+  { mode: 'region', highlight: 'asia', number: 59, text: 'people would live in Asia', subtext: 'More than half the world in one continent' },
+  { mode: 'income', highlight: 'extreme-poverty', number: 9, text: 'people would live on less than $2/day', subtext: 'About 700 million in extreme poverty' },
+  { mode: 'internet', highlight: 'offline', number: 37, text: 'people have never used the internet', subtext: 'Nearly 3 billion people offline' },
+  { mode: 'income', highlight: 'wealthy', number: 1, text: 'person would be in the top 1%', subtext: 'Earning more than $150/day ($55,000/year)' },
+  { mode: 'region', highlight: 'africa', number: 18, text: 'people would live in Africa', subtext: 'The fastest-growing continent' },
+  { mode: 'urban', highlight: 'rural', number: 43, text: 'people would live in rural areas', subtext: 'Farms, villages, and small towns' },
+  { mode: 'age', highlight: 'children', number: 26, text: 'people would be under 15 years old', subtext: 'More than 2 billion children' },
+  { mode: 'income', highlight: 'lower-middle', number: 40, text: 'people would earn $3-12 per day', subtext: 'The world\'s largest income group' },
+  { mode: 'region', highlight: 'oceania', number: 1, text: 'person would live in Oceania', subtext: 'Australia, New Zealand, Pacific Islands' },
+  { mode: 'age', highlight: 'elderly', number: 9, text: 'people would be 65 or older', subtext: 'A number that\'s growing fast' }
 ]

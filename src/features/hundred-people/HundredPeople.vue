@@ -1,11 +1,62 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { viewModes } from '@/shared/data/regions'
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { viewModes, storyFacts } from '@/shared/data/regions'
 
 const currentMode = ref('region')
 const hoveredGroup = ref(null)
 const isTransitioning = ref(false)
 const transitionPhase = ref('idle') // 'idle' | 'out' | 'shuffle' | 'in'
+
+// Storytelling mode
+const isStorytelling = ref(false)
+const currentFactIndex = ref(0)
+let storyInterval = null
+
+const currentFact = computed(() => storyFacts[currentFactIndex.value])
+
+function startStorytelling() {
+  isStorytelling.value = true
+  showCurrentFact()
+  storyInterval = setInterval(() => {
+    currentFactIndex.value = (currentFactIndex.value + 1) % storyFacts.length
+    showCurrentFact()
+  }, 5000) // 5 seconds per fact
+}
+
+function stopStorytelling() {
+  isStorytelling.value = false
+  if (storyInterval) {
+    clearInterval(storyInterval)
+    storyInterval = null
+  }
+  hoveredGroup.value = null
+}
+
+function toggleStorytelling() {
+  if (isStorytelling.value) {
+    stopStorytelling()
+  } else {
+    startStorytelling()
+  }
+}
+
+function showCurrentFact() {
+  const fact = storyFacts[currentFactIndex.value]
+  // Switch to the right mode if needed
+  if (currentMode.value !== fact.mode && !isTransitioning.value) {
+    setMode(fact.mode)
+    // Wait for transition to complete before highlighting
+    setTimeout(() => {
+      hoveredGroup.value = fact.highlight
+    }, 600)
+  } else {
+    hoveredGroup.value = fact.highlight
+  }
+}
+
+onUnmounted(() => {
+  if (storyInterval) clearInterval(storyInterval)
+})
 
 const currentView = computed(() => {
   return viewModes.find(m => m.id === currentMode.value)
@@ -78,16 +129,45 @@ function setMode(modeId) {
       <p class="text-lg text-base-content/70">{{ currentView.description }}</p>
     </div>
 
+    <!-- Storytelling Fact Card -->
+    <div v-if="isStorytelling" class="mb-8">
+      <div class="story-card text-center px-6 py-8 rounded-3xl max-w-lg mx-auto">
+        <p class="text-base-content/60 text-sm mb-2 uppercase tracking-wide">If the world were 100 people...</p>
+        <p class="text-5xl font-black mb-2 number-highlight">{{ currentFact.number }}</p>
+        <p class="text-xl font-medium mb-3">{{ currentFact.text }}</p>
+        <p class="text-base-content/60 text-sm">{{ currentFact.subtext }}</p>
+        <div class="flex justify-center gap-1 mt-6">
+          <span
+            v-for="(_, i) in storyFacts"
+            :key="i"
+            class="w-2 h-2 rounded-full transition-all duration-300"
+            :class="i === currentFactIndex ? 'bg-primary w-6' : 'bg-base-content/20'"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Mode Selector -->
-    <div class="flex flex-wrap justify-center gap-2 mb-8">
+    <div class="flex flex-wrap justify-center items-center gap-2 mb-8">
       <button
         v-for="mode in viewModes"
         :key="mode.id"
-        @click="setMode(mode.id)"
+        @click="setMode(mode.id); stopStorytelling()"
         class="btn btn-sm mode-btn"
         :class="currentMode === mode.id ? 'btn-primary shadow-lg' : 'btn-ghost'"
+        :disabled="isTransitioning"
       >
         {{ mode.name }}
+      </button>
+      <div class="divider divider-horizontal mx-1"></div>
+      <button
+        @click="toggleStorytelling"
+        class="btn btn-sm gap-2"
+        :class="isStorytelling ? 'btn-secondary' : 'btn-outline btn-secondary'"
+      >
+        <span v-if="isStorytelling">⏸</span>
+        <span v-else>▶</span>
+        {{ isStorytelling ? 'Stop' : 'Auto-play' }}
       </button>
     </div>
 
@@ -251,5 +331,20 @@ function setMode(modeId) {
   backdrop-filter: blur(8px);
   border: 1px solid oklch(var(--bc) / 0.1);
   box-shadow: 0 8px 32px oklch(var(--bc) / 0.15);
+}
+
+/* Storytelling card */
+.story-card {
+  background: linear-gradient(135deg, oklch(var(--p) / 0.1) 0%, oklch(var(--s) / 0.1) 100%);
+  border: 1px solid oklch(var(--p) / 0.2);
+  box-shadow: 0 8px 32px oklch(var(--p) / 0.15);
+}
+
+.number-highlight {
+  background: linear-gradient(135deg, oklch(var(--p)) 0%, oklch(var(--s)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 40px oklch(var(--p) / 0.5);
 }
 </style>

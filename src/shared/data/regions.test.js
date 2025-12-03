@@ -33,8 +33,8 @@ describe('regions data', () => {
 })
 
 describe('incomeGroups data', () => {
-  it('has 4 income groups', () => {
-    expect(incomeGroups).toHaveLength(4)
+  it('has 6 income groups', () => {
+    expect(incomeGroups).toHaveLength(6)
   })
 
   it('income groups sum to 100 people', () => {

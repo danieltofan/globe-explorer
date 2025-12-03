@@ -29,15 +29,16 @@ describe('HundredPeople', () => {
     expect(dots.length).toBe(100)
   })
 
-  it('renders all 5 view mode buttons', () => {
+  it('renders all 5 view mode buttons plus auto-play', () => {
     const wrapper = mount(HundredPeople)
     const buttons = wrapper.findAll('button')
-    expect(buttons.length).toBe(5)
+    expect(buttons.length).toBe(6) // 5 modes + 1 auto-play
     expect(wrapper.text()).toContain('By Region')
     expect(wrapper.text()).toContain('By Income')
     expect(wrapper.text()).toContain('Internet Access')
     expect(wrapper.text()).toContain('Urban vs Rural')
     expect(wrapper.text()).toContain('By Age')
+    expect(wrapper.text()).toContain('Auto-play')
   })
 
   it('starts with region mode active', () => {
