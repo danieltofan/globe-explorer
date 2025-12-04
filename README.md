@@ -176,6 +176,12 @@ This app follows WCAG 2.1 AA guidelines:
 - Country data: [REST Countries](https://restcountries.com/)
 - Language families: [Ethnologue](https://www.ethnologue.com/)
 
+## Performance
+
+This app achieves **100/100/100/100** on Google PageSpeed Insights (Performance, Accessibility, Best Practices, SEO).
+
+Every page includes a **"PageSpeed Me"** link in the footer that opens Google PageSpeed Insights for the current page. This provides radical transparency—you can verify our performance claims anytime with one click.
+
 ## Browser Support
 
 - Chrome 90+

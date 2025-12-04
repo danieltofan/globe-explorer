@@ -54,7 +54,15 @@ import { RouterLink, RouterView } from 'vue-router'
     <!-- Footer -->
     <footer class="footer footer-center p-4 bg-base-200 text-base-content">
       <aside>
-        <p>Built with Vue 3 + DaisyUI | Data from REST Countries API</p>
+        <p>
+          Built with Vue 3 + DaisyUI | Data from REST Countries API |
+          <a
+            href="https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fglobe-explorer.codecrank.ai%2F"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="pagespeed-link"
+          >PageSpeed Me</a>
+        </p>
       </aside>
     </footer>
   </div>
@@ -145,5 +153,15 @@ import { RouterLink, RouterView } from 'vue-router'
   outline: 2px solid oklch(var(--p));
   outline-offset: 4px;
   border-radius: 4px;
+}
+
+/* PageSpeed link - matches footer text */
+.pagespeed-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pagespeed-link:hover {
+  text-decoration: underline;
 }
 </style>
