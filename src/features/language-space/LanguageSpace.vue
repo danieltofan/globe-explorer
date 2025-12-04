@@ -340,7 +340,7 @@ onUnmounted(() => {
       <div ref="containerRef" class="flex-1 relative cursor-grab"></div>
 
       <!-- Side Panel -->
-      <div class="w-80 bg-base-200 overflow-y-auto p-4 space-y-4">
+      <div class="w-80 bg-base-200 p-4 space-y-4 overflow-y-auto">
         <!-- Selected Language Info -->
         <div v-if="selectedLanguage" class="card bg-base-100 shadow">
           <div class="card-body p-4">
@@ -356,7 +356,7 @@ onUnmounted(() => {
             </p>
 
             <div class="divider text-xs">Nearest Neighbors</div>
-            <ul class="space-y-1">
+            <ul>
               <li
                 v-for="neighbor in nearestNeighbors"
                 :key="neighbor.code"
@@ -383,14 +383,14 @@ onUnmounted(() => {
 
         <!-- Family Filter -->
         <div class="card bg-base-100 shadow">
-          <div class="card-body p-4">
+          <div class="card-body p-3">
             <h3 class="card-title text-sm">Language Families</h3>
-            <div class="space-y-1 max-h-64 overflow-y-auto">
+            <div>
               <button
                 v-for="fam in familyList"
                 :key="fam.name"
                 @click="selectedFamily = selectedFamily === fam.name ? null : fam.name"
-                class="w-full text-left p-2 rounded text-sm flex items-center gap-2 hover:bg-base-200 transition-colors"
+                class="w-full text-left py-1 px-2 rounded text-sm flex items-center gap-2 hover:bg-base-200 transition-colors"
                 :class="{ 'bg-base-300': selectedFamily === fam.name }"
               >
                 <span
