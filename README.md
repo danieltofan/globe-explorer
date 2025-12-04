@@ -137,17 +137,19 @@ globe-explorer/
 
 ## Test Coverage
 
-**106 tests across 7 test files**
+**153 tests across 9 test files**
 
 ```
 -------------------|---------|----------|---------|---------|
 File               | % Stmts | % Branch | % Funcs | % Lines |
 -------------------|---------|----------|---------|---------|
-All files          |   64.49 |    80.00 |   48.57 |   64.49 |
+All files          |   92.53 |    83.67 |   52.32 |   92.53 |
 App.vue            |  100.00 |   100.00 |  100.00 |  100.00 |
 Compare.vue        |   94.32 |    69.76 |   72.72 |   94.32 |
 CountriesCartogram |   97.36 |    88.15 |   60.60 |   97.36 |
 HundredPeople.vue  |   81.78 |    79.31 |   30.00 |   81.78 |
+LanguageSpace.vue  |   83.02 |    88.57 |   46.15 |   83.02 |
+languages.js       |  100.00 |   100.00 |  100.00 |  100.00 |
 countries.js       |  100.00 |    91.30 |   45.45 |  100.00 |
 regions.js         |  100.00 |   100.00 |  100.00 |  100.00 |
 router/index.js    |  100.00 |   100.00 |     N/A |  100.00 |
