@@ -16,6 +16,11 @@ export const tileSizes = {
   xs: { min: 0, width: 36, height: 22 }            // Small countries
 }
 
+/**
+ * Get tile size category based on country area
+ * @param {number} area - Country area in km²
+ * @returns {'xxl'|'xl'|'l'|'m'|'s'|'xs'} Size category
+ */
 export function getTileSize(area) {
   if (area >= 5000000) return 'xxl'
   if (area >= 3000000) return 'xl'
@@ -25,6 +30,11 @@ export function getTileSize(area) {
   return 'xs'
 }
 
+/**
+ * Get pixel dimensions for a country tile
+ * @param {number} area - Country area in km²
+ * @returns {{min: number, width: number, height: number}} Tile dimensions
+ */
 export function getTileDimensions(area) {
   const size = getTileSize(area)
   return tileSizes[size]
@@ -344,7 +354,11 @@ export const colorModes = [
   }
 ]
 
-// Get min/max for a field across all countries
+/**
+ * Get min/max range for a numeric field across all countries
+ * @param {string} field - Field name (e.g., 'population', 'gdpPerCapita')
+ * @returns {{min: number, max: number}} Range object
+ */
 export function getFieldRange(field) {
   const values = countries.map(c => c[field]).filter(v => v > 0)
   return {
@@ -353,7 +367,14 @@ export function getFieldRange(field) {
   }
 }
 
-// Get color for a value within a gradient
+/**
+ * Map a value to a color using logarithmic interpolation
+ * @param {number} value - The value to map
+ * @param {number} min - Minimum value in range
+ * @param {number} max - Maximum value in range
+ * @param {string[]} gradient - Array of hex colors (e.g., ['#fff', '#f00'])
+ * @returns {string} Hex color string
+ */
 export function getGradientColor(value, min, max, gradient) {
   if (!gradient || value <= 0) return '#e5e7eb'
 

@@ -184,22 +184,38 @@ export const languages = [
   { code: 'ka', name: 'Georgian', family: 'Isolate', subfamily: 'Kartvelian', speakers: 4, x: 5, y: 15, z: -5 }
 ]
 
-// Get language by code
+/**
+ * Find a language by its ISO code
+ * @param {string} code - ISO 639-1 language code (e.g., 'en', 'es')
+ * @returns {Object|undefined} Language object or undefined if not found
+ */
 export function getLanguage(code) {
   return languages.find(l => l.code === code)
 }
 
-// Get all languages in a family
+/**
+ * Get all languages belonging to a language family
+ * @param {string} family - Family name (e.g., 'Romance', 'Germanic')
+ * @returns {Object[]} Array of language objects
+ */
 export function getLanguagesByFamily(family) {
   return languages.filter(l => l.family === family)
 }
 
-// Get unique families
+/**
+ * Get list of unique language family names
+ * @returns {string[]} Array of family names
+ */
 export function getFamilies() {
   return [...new Set(languages.map(l => l.family))]
 }
 
-// Calculate distance between two languages in embedding space
+/**
+ * Calculate Euclidean distance between two languages in 3D embedding space
+ * @param {Object} lang1 - First language with x, y, z coordinates
+ * @param {Object} lang2 - Second language with x, y, z coordinates
+ * @returns {number} Distance in embedding space units
+ */
 export function getDistance(lang1, lang2) {
   const dx = lang1.x - lang2.x
   const dy = lang1.y - lang2.y
@@ -207,7 +223,12 @@ export function getDistance(lang1, lang2) {
   return Math.sqrt(dx * dx + dy * dy + dz * dz)
 }
 
-// Find nearest neighbors
+/**
+ * Find the n nearest languages to a given language in embedding space
+ * @param {string} langCode - ISO code of the source language
+ * @param {number} [n=5] - Number of neighbors to return
+ * @returns {Object[]} Array of language objects with added `distance` property
+ */
 export function getNearestNeighbors(langCode, n = 5) {
   const lang = getLanguage(langCode)
   if (!lang) return []
