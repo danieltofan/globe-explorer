@@ -170,7 +170,7 @@ function handleBackdropClick(e) {
     <!-- Header -->
     <div class="container mx-auto px-4">
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold mb-2 header-gradient">World Cartogram</h1>
+        <h1 class="text-4xl font-bold mb-2 header-gradient" style="line-height: 1.3;">World Cartogram</h1>
         <p class="text-lg text-base-content/70">{{ currentMode.description }}</p>
       </div>
 
@@ -229,7 +229,11 @@ function handleBackdropClick(e) {
           @click="selectedCountry = country"
         >
           <template v-if="currentColorMode === 'flags'">
-            <span class="tile-flag">{{ country.flag }}</span>
+            <img
+              :src="`https://flagcdn.com/w80/${country.code.toLowerCase()}.png`"
+              :alt="country.name"
+              class="tile-flag-img"
+            />
           </template>
           <template v-else>
             <span class="tile-code">{{ country.code }}</span>
@@ -470,9 +474,13 @@ function handleBackdropClick(e) {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.tile-flag {
-  font-size: 1.4em;
-  line-height: 1;
+.tile-flag-img {
+  width: 70%;
+  height: auto;
+  max-height: 60%;
+  object-fit: contain;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Flag mode */
