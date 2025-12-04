@@ -227,8 +227,8 @@ describe('Canvas and Positioning', () => {
   it('has canvas dimensions', () => {
     expect(canvasWidth).toBeGreaterThan(0)
     expect(canvasHeight).toBeGreaterThan(0)
-    expect(canvasWidth).toBe(1400)
-    expect(canvasHeight).toBe(700)
+    expect(canvasWidth).toBe(1500)
+    expect(canvasHeight).toBe(560)
   })
 
   it('has tile sizes for all categories', () => {

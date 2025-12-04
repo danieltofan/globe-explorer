@@ -54,6 +54,39 @@ function getCountryColor(country) {
   return getGradientColor(value, colorRange.value.min, colorRange.value.max, mode.gradient)
 }
 
+// Calculate relative luminance from hex color (WCAG formula)
+function getLuminance(hex) {
+  const rgb = hex.replace('#', '').match(/.{2}/g).map(x => {
+    const c = parseInt(x, 16) / 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  })
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+}
+
+// Calculate contrast ratio between two colors
+function getContrastRatio(lum1, lum2) {
+  const lighter = Math.max(lum1, lum2)
+  const darker = Math.min(lum1, lum2)
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+// Get optimal text color for contrast (targets 4.5:1 WCAG AA)
+function getTextColor(bgHex) {
+  if (!bgHex || bgHex === 'transparent' || bgHex === '#e5e7eb') {
+    return null // Use default CSS color
+  }
+
+  const bgLum = getLuminance(bgHex)
+  const whiteLum = 1
+  const blackLum = 0
+
+  const whiteContrast = getContrastRatio(whiteLum, bgLum)
+  const blackContrast = getContrastRatio(blackLum, bgLum)
+
+  // Return color with better contrast, prefer white if close
+  return whiteContrast >= blackContrast ? '#ffffff' : '#000000'
+}
+
 // Get formatted value for display
 function getFormattedValue(country) {
   const mode = currentMode.value
@@ -83,20 +116,40 @@ function getTileSizeClass(area) {
   return `tile-${getTileSize(area)}`
 }
 
-// Offset to center the map better (shift left to reduce left padding)
+// Base offset to center the map
 const xOffset = -3.5
+
+// Continent offsets to add ocean gaps
+const continentOffsets = {
+  northAmerica: { x: -3, y: 0 },
+  southAmerica: { x: -2, y: 2 },
+  europe: { x: 0, y: -2 },
+  africa: { x: 0, y: 2 },
+  asia: { x: 3, y: 0 },
+  oceania: { x: 2.5, y: 2 }
+}
 
 // Get tile position and dimensions (scaled)
 function getTileStyle(country) {
   const dims = getTileDimensions(country.area)
-  return {
-    left: `${country.x + xOffset}%`,
-    top: `${country.y}%`,
+  const bgColor = getCountryColor(country)
+  const textColor = getTextColor(bgColor)
+  const cOffset = continentOffsets[country.continent] || { x: 0, y: 0 }
+
+  const style = {
+    left: `${country.x + xOffset + cOffset.x}%`,
+    top: `${country.y + cOffset.y}%`,
     width: `${Math.round(dims.width * scale.value)}px`,
     height: `${Math.round(dims.height * scale.value)}px`,
-    backgroundColor: getCountryColor(country),
+    backgroundColor: bgColor,
     transform: 'translate(-50%, -50%)'
   }
+
+  if (textColor) {
+    style.color = textColor
+  }
+
+  return style
 }
 
 // Close detail card
@@ -356,20 +409,18 @@ function handleBackdropClick(e) {
 
 /* World canvas container */
 .world-canvas-container {
-  width: 95vw;
-  max-width: 95vw;
-  margin: 0 auto;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-50vw + 50%);
   overflow: hidden;
   background: oklch(var(--b2) / 0.3);
-  border-radius: 1rem;
-  border: 1px solid oklch(var(--bc) / 0.05);
 }
 
 /* Allow horizontal scroll on small screens */
 @media (max-width: 1199px) {
   .world-canvas-container {
-    width: 100%;
-    max-width: 100%;
+    width: 100vw;
+    max-width: 100vw;
     overflow-x: auto;
   }
 }
@@ -393,30 +444,30 @@ function handleBackdropClick(e) {
   z-index: 1;
 }
 
-/* Tile sizes - font scaling */
-.tile-xxl { font-size: 0.9rem; }
-.tile-xl { font-size: 0.8rem; }
-.tile-l { font-size: 0.7rem; }
-.tile-m { font-size: 0.6rem; }
-.tile-s { font-size: 0.55rem; }
-.tile-xs { font-size: 0.45rem; }
+/* Tile sizes - font scaling with minimum for legibility */
+.tile-xxl { font-size: 1rem; }
+.tile-xl { font-size: 0.9rem; }
+.tile-l { font-size: 0.8rem; }
+.tile-m { font-size: 0.7rem; }
+.tile-s { font-size: 0.65rem; }
+.tile-xs { font-size: 0.6rem; }
 
 /* Tile content */
 .tile-code {
   font-weight: 700;
-  color: oklch(var(--bc));
-  text-shadow: 0 1px 2px oklch(var(--b1) / 0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   line-height: 1.2;
 }
 
 .tile-name {
   font-size: 0.5em;
-  opacity: 0.8;
+  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 95%;
   line-height: 1.2;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .tile-flag {

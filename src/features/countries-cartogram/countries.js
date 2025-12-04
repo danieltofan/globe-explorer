@@ -3,8 +3,8 @@
 // Positions are hand-curated for map-like cartogram layout
 
 // Canvas dimensions (reference size, scales responsively)
-export const canvasWidth = 1400
-export const canvasHeight = 700
+export const canvasWidth = 1500
+export const canvasHeight = 560
 
 // Tile size categories based on geographic area (km²)
 export const tileSizes = {
@@ -71,7 +71,6 @@ export const countries = [
   { code: 'AD', name: 'Andorra', continent: 'europe', area: 468, population: 80000, gdpPerCapita: 42030, lifeExpectancy: 81.5, internetPenetration: 94, flag: '🇦🇩', x: 32, y: 31 },
   { code: 'IT', name: 'Italy', continent: 'europe', area: 301340, population: 59110000, gdpPerCapita: 35657, lifeExpectancy: 83.5, internetPenetration: 85, flag: '🇮🇹', x: 39, y: 31 },
   { code: 'SM', name: 'San Marino', continent: 'europe', area: 61, population: 34000, gdpPerCapita: 47000, lifeExpectancy: 83.1, internetPenetration: 60, flag: '🇸🇲', x: 39, y: 30 },
-  { code: 'VA', name: 'Vatican City', continent: 'europe', area: 0.44, population: 800, gdpPerCapita: 0, lifeExpectancy: 0, internetPenetration: 0, flag: '🇻🇦', x: 39, y: 32 },
   { code: 'MT', name: 'Malta', continent: 'europe', area: 316, population: 520000, gdpPerCapita: 34000, lifeExpectancy: 82.5, internetPenetration: 87, flag: '🇲🇹', x: 40, y: 37 },
   { code: 'SI', name: 'Slovenia', continent: 'europe', area: 20273, population: 2120000, gdpPerCapita: 28439, lifeExpectancy: 81.3, internetPenetration: 89, flag: '🇸🇮', x: 41, y: 28 },
   { code: 'HR', name: 'Croatia', continent: 'europe', area: 56594, population: 3870000, gdpPerCapita: 18588, lifeExpectancy: 78.2, internetPenetration: 79, flag: '🇭🇷', x: 42, y: 30 },
