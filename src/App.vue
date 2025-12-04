@@ -7,20 +7,29 @@ import { RouterLink, RouterView } from 'vue-router'
     <!-- Navbar -->
     <div class="navbar bg-base-200 sticky top-0 z-50 shadow-lg">
       <div class="navbar-start">
-        <RouterLink to="/" class="btn btn-ghost text-xl gap-2">
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        <RouterLink to="/" class="btn btn-ghost text-xl gap-2 logo-link">
+          <svg class="w-6 h-6 logo-globe" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <defs>
+              <linearGradient id="globeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="50%" stop-color="#10b981" />
+                <stop offset="100%" stop-color="#f59e0b" />
+              </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="10" stroke="url(#globeGradient)"/>
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="url(#globeGradient)"/>
           </svg>
-          Globe Explorer
+          <span class="logo-text">
+            <span class="text-primary">Globe</span> <span class="text-secondary">Explorer</span>
+          </span>
         </RouterLink>
       </div>
       <div class="navbar-center hidden sm:flex">
-        <ul class="menu menu-horizontal px-1 gap-2">
-          <li><RouterLink to="/" class="font-medium">100 People</RouterLink></li>
-          <li><RouterLink to="/cartogram" class="font-medium">Cartogram</RouterLink></li>
-          <li><RouterLink to="/languages" class="font-medium">Languages</RouterLink></li>
-          <li><RouterLink to="/compare" class="font-medium">Compare</RouterLink></li>
+        <ul class="menu menu-horizontal px-1 gap-1">
+          <li><RouterLink to="/" class="nav-link font-medium">100 People</RouterLink></li>
+          <li><RouterLink to="/cartogram" class="nav-link font-medium">Cartogram</RouterLink></li>
+          <li><RouterLink to="/languages" class="nav-link font-medium">Languages</RouterLink></li>
+          <li><RouterLink to="/compare" class="nav-link font-medium">Compare</RouterLink></li>
         </ul>
       </div>
       <div class="navbar-end">
@@ -45,3 +54,64 @@ import { RouterLink, RouterView } from 'vue-router'
     </footer>
   </div>
 </template>
+
+<style scoped>
+/* Logo hover effect */
+.logo-link:hover .logo-globe {
+  transform: rotate(15deg);
+  transition: transform 0.3s ease;
+}
+
+.logo-globe {
+  transition: transform 0.3s ease;
+}
+
+/* Nav link styling with underline animation */
+.nav-link {
+  position: relative;
+  background: transparent !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: oklch(var(--p));
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+/* Hover: underline grows from center */
+.nav-link:hover::after {
+  width: 70%;
+  left: 15%;
+}
+
+.nav-link:hover {
+  color: oklch(var(--p));
+}
+
+/* Active link: full underline, different color */
+.nav-link.router-link-exact-active {
+  color: oklch(var(--s));
+}
+
+.nav-link.router-link-exact-active::after {
+  width: 80%;
+  left: 10%;
+  background: oklch(var(--s));
+}
+
+/* Active link hover: subtle pulse */
+.nav-link.router-link-exact-active:hover::after {
+  animation: pulse-underline 1s ease infinite;
+}
+
+@keyframes pulse-underline {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+</style>
