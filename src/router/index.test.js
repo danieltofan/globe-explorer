@@ -9,18 +9,18 @@ describe('Router', () => {
     expect(home.name).toBe('home')
   })
 
-  it('has countries list route', () => {
+  it('has cartogram route', () => {
     const routes = router.getRoutes()
-    const countries = routes.find(r => r.path === '/countries')
-    expect(countries).toBeDefined()
-    expect(countries.name).toBe('countries')
+    const cartogram = routes.find(r => r.path === '/cartogram')
+    expect(cartogram).toBeDefined()
+    expect(cartogram.name).toBe('cartogram')
   })
 
-  it('has country detail route with param', () => {
+  it('has languages route', () => {
     const routes = router.getRoutes()
-    const detail = routes.find(r => r.path === '/countries/:code')
-    expect(detail).toBeDefined()
-    expect(detail.name).toBe('country-detail')
+    const languages = routes.find(r => r.path === '/languages')
+    expect(languages).toBeDefined()
+    expect(languages.name).toBe('languages')
   })
 
   it('has compare route', () => {
@@ -30,14 +30,7 @@ describe('Router', () => {
     expect(compare.name).toBe('compare')
   })
 
-  it('has cartogram route', () => {
-    const routes = router.getRoutes()
-    const cartogram = routes.find(r => r.path === '/cartogram')
-    expect(cartogram).toBeDefined()
-    expect(cartogram.name).toBe('cartogram')
-  })
-
-  it('has exactly 5 routes', () => {
-    expect(router.getRoutes().length).toBe(5)
+  it('has exactly 4 routes', () => {
+    expect(router.getRoutes().length).toBe(4)
   })
 })

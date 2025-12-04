@@ -19,7 +19,7 @@ import { RouterLink, RouterView } from 'vue-router'
         <ul class="menu menu-horizontal px-1 gap-2">
           <li><RouterLink to="/" class="font-medium">100 People</RouterLink></li>
           <li><RouterLink to="/cartogram" class="font-medium">Cartogram</RouterLink></li>
-          <li><RouterLink to="/countries" class="font-medium">Countries</RouterLink></li>
+          <li><RouterLink to="/languages" class="font-medium">Languages</RouterLink></li>
           <li><RouterLink to="/compare" class="font-medium">Compare</RouterLink></li>
         </ul>
       </div>

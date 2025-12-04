@@ -9,24 +9,19 @@ const router = createRouter({
       component: () => import('@/features/hundred-people/HundredPeople.vue')
     },
     {
-      path: '/countries',
-      name: 'countries',
-      component: () => import('@/features/country-detail/CountryList.vue')
+      path: '/cartogram',
+      name: 'cartogram',
+      component: () => import('@/features/countries-cartogram/CountriesCartogram.vue')
     },
     {
-      path: '/countries/:code',
-      name: 'country-detail',
-      component: () => import('@/features/country-detail/CountryDetail.vue')
+      path: '/languages',
+      name: 'languages',
+      component: () => import('@/features/language-space/LanguageSpace.vue')
     },
     {
       path: '/compare',
       name: 'compare',
       component: () => import('@/features/compare/Compare.vue')
-    },
-    {
-      path: '/cartogram',
-      name: 'cartogram',
-      component: () => import('@/features/countries-cartogram/CountriesCartogram.vue')
     }
   ]
 })
