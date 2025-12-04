@@ -30,7 +30,14 @@ describe('Router', () => {
     expect(compare.name).toBe('compare')
   })
 
-  it('has exactly 4 routes', () => {
-    expect(router.getRoutes().length).toBe(4)
+  it('has cartogram route', () => {
+    const routes = router.getRoutes()
+    const cartogram = routes.find(r => r.path === '/cartogram')
+    expect(cartogram).toBeDefined()
+    expect(cartogram.name).toBe('cartogram')
+  })
+
+  it('has exactly 5 routes', () => {
+    expect(router.getRoutes().length).toBe(5)
   })
 })

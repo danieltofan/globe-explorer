@@ -22,6 +22,11 @@ const router = createRouter({
       path: '/compare',
       name: 'compare',
       component: () => import('@/features/compare/Compare.vue')
+    },
+    {
+      path: '/cartogram',
+      name: 'cartogram',
+      component: () => import('@/features/countries-cartogram/CountriesCartogram.vue')
     }
   ]
 })
