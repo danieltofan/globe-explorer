@@ -7,6 +7,63 @@
 **PageSpeed:** 100/100/100/100 (mobile)
 **Tests:** 153 passing, 92% coverage
 
+**Active initiative:** Globe Explorer v2 — the sprite-faces upgrade. See Session 130 (2026-04-24) for kickoff. This work double-serves as the Neurons Lab Framework Battle course's Module 5 Path A capstone content — the v1→v2 journey IS the lesson. Cross-reference: [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.6 + Appendix A-10.
+
+---
+
+## Session 130 - April 24, 2026 (v2 Initiative Kickoff — Sprite Faces Upgrade)
+
+**Focus:** Lock the strategy for upgrading the 100 People view from colored dots to AI-generated sprite faces, and capture the cross-repo dependency with the Neurons Lab course.
+
+### Strategic decisions
+
+- **Live demo = v2.** When v2 ships, `globe-explorer.codecrank.ai` updates to the sprite-faces version. v2 is the wow moment that sells the Neurons Lab course; live demo must reflect it.
+- **Tag v1 before starting v2.** Create `v1.0-dots` git tag on current HEAD before the first v2 commit. The tag is immutable and serves as the permanent reference point for the Neurons Lab course's Modules 1–4 (which teach building the dots version). Tags chosen over branches because branches rot; tags don't.
+- **Optional v1 deploy** at `v1.globe-explorer.codecrank.ai` — TBD whether worth the small cost; provides a "what mine should look like at end of Module 4" comparison for course students. Decide later.
+- **Journey capture is non-negotiable.** Every prompt, every failed AI output, every design decision must be logged in real time during v2 development. The captured journey IS the Module 5 Path A lesson. Reconstruct-after-the-fact produces sanitized fiction; the real process is what makes the lesson authentic.
+
+### Five sprite modes — design-risk audit
+
+The five 100-People modes are NOT equally safe. Risk levels locked:
+
+| Mode | Risk | Approach |
+|---|---|---|
+| Region (faces) | Low if executed well | 15–20 variants per region; commit to within-region diversity, not stereotyping |
+| Age | Low | Infant → child → adult → elderly progression |
+| Urban/Rural | Medium | Use building density (skyscraper / apartment / single home / single home with land); avoid "huts" caricature |
+| Internet | Medium | Real device tiers (smartphone / basic phone / no device); drop the abacus icon (orientalism trap) |
+| Income | **Highest** | Attire-as-class is globally unreliable. Replace with abstract symbols (coin counts, dwelling size, bar height) so income reads quantitatively. The income-mode redesign is itself the central "AI gave me what I asked for; what I asked for was wrong" lesson moment in Module 5. |
+
+### Technical shape
+
+- **Five sprite sheets**, one per mode. ~15–20 unique variants per sheet at 64×64 render size, packed as WebP at quality ~75. Target total payload <500KB across all five.
+- **Stable person identity:** each of the 100 dots gets a persistent `person-001..100` identity. Mode change swaps which sprite layer is shown for that person, not which person is in that grid cell. Same individual, different lens — richer storytelling than the current "shuffle on mode change" pattern.
+- **A11y:** per-dot `aria-label` ("Person from Asia, age 35, urban, has internet, middle income"). Faces are decorative; labels are the truth.
+
+### Build sequencing
+
+1. Tag `v1.0-dots` on current main (must precede v2 commit 1).
+2. Author sprite generation prompts; iterate on Region mode first (lowest risk, validates the pipeline).
+3. Run diversity audit on Region output before adopting; iterate until clean.
+4. Repeat per mode in risk order: Age → Urban/Rural → Internet → Income.
+5. Income mode requires explicit design phase before generation — DO NOT just prompt for "rich/middle/poor people"; design the abstract symbol approach first.
+6. Pack sprites; integrate with HundredPeople.vue using the stable-identity pattern.
+7. Tests: visual regression where possible, manual diversity-distribution checklist where not.
+8. Update README to flag v2 + reference v1 tag for course material.
+9. Deploy. Live demo flips to v2.
+10. Hand off journey log to Neurons Lab Module 5 Path A authoring (BUILD_PLAN Phase 8.6).
+
+### Cross-repo references
+
+- BUILD_PLAN Phase 8.6 (Module 5 capstone) is blocked on this v2 work shipping + the journey being captured.
+- BUILD_PLAN Appendix A-10 locks this v1/v2 strategy as the canonical decision.
+- Modules 1–4 of the Lab course are NOT blocked by this v2 work.
+
+### Status
+
+- **Open.** Strategy locked, no code yet.
+- Next concrete step when work resumes: create the `v1.0-dots` tag.
+
 ---
 
 ## Session 129 - December 4, 2025

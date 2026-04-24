@@ -2,6 +2,8 @@
 
 An interactive data visualization app that helps you understand our world through intuitive, accessible visualizations. Built with Vue 3 and modern web technologies.
 
+> **v2 in progress (April 2026):** the 100 People view is being upgraded from colored dots to AI-generated sprite faces. Strategy + design-risk audit captured in [`SESSION_LOG.md`](SESSION_LOG.md) Session 130. The current dots version will be permanently preserved at the `v1.0-dots` git tag and serves as the reference point for the Neurons Lab Framework Battle course (Modules 1–4 build v1; Module 5 Path A is the v1→v2 upgrade journey). See [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.6 + Appendix A-10 for the cross-repo dependency.
+
 ## Features
 
 ### The World as 100 People
