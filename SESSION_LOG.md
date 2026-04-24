@@ -11,6 +11,32 @@
 
 ---
 
+## Session 131 - April 24, 2026 (v2 Scaffolding + v1.0-dots Tag)
+
+**Focus:** Scaffold the v2 build journal directory structure and lock in the capture protocol that will produce honest course material later. Tag the canonical pre-v2 commit so Lab course Modules 1–4 have an immutable reference point.
+
+### Completed
+
+- **Tag:** `v1.0-dots` created on `586cd15` (the last commit before v2 references existed). This is the canonical pre-v2 state that the Lab Framework Battle course's Modules 1–4 reference. Tags chosen over branches because tags don't rot. (Local only — Daniel pushes when ready.)
+- **Scaffolded `journey/v2/`** in the GE repo. Structure:
+  - `README.md` — full capture protocol + risk audit + course cross-reference
+  - Per-mode subdirectories (`01-region`, `02-age`, `03-urban-rural`, `04-internet`, `05-income`) each with `prompts.md`, `decisions.md`, `variants-raw/`, `variants-final/`. Region also has `diversity-audit.md`. Income also has `redesign.md` (the headline "what AI got wrong" story).
+  - `tooling/` with `tool-comparison.md` and `sprite-pipeline.md` skeletons.
+- **Capture protocol locked.** The hardest rule: capture *before* curating. Failed prompts and bad outputs are not deleted — they're the lesson. Reconstructed-after-the-fact prompts produce tutorial fiction. See `journey/v2/README.md` for the full 7-step checklist.
+- **Risk audit pinned in scaffolding** so each mode's notes file already states its risk level and approach (Income highest — design BEFORE prompting).
+
+### Next concrete step
+
+Tooling spike: try Flux 2 / DALL-E 3 / Imagen / Midjourney on a single Region prompt each, capture outputs to `journey/v2/01-region/variants-raw/`, document trade-offs in `journey/v2/tooling/tool-comparison.md`. **Pick by trying, not by hearsay.**
+
+### Status
+
+- Tag in place. Scaffolding committed.
+- No prompts sent yet. No variants generated yet.
+- Ready for the tooling spike whenever work resumes.
+
+---
+
 ## Session 130 - April 24, 2026 (v2 Initiative Kickoff — Sprite Faces Upgrade)
 
 **Focus:** Lock the strategy for upgrading the 100 People view from colored dots to AI-generated sprite faces, and capture the cross-repo dependency with the Neurons Lab course.
