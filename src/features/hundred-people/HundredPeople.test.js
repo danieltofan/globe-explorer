@@ -43,7 +43,10 @@ describe('HundredPeople', () => {
 
   it('starts with region mode active', () => {
     const wrapper = mount(HundredPeople)
-    const activeButton = wrapper.find('.btn-primary')
+    // Scope to the mode-selector group so we don't match the Display toggle's
+    // active button (Dots vs Icons), which also uses btn-primary.
+    const modeGroup = wrapper.find('[aria-label="View mode selection"]')
+    const activeButton = modeGroup.find('.btn-primary')
     expect(activeButton.text()).toBe('By Region')
   })
 
