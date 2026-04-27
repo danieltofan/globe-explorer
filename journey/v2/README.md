@@ -1,11 +1,16 @@
 # Globe Explorer v2 — Build Journey
 
-This directory is the raw provenance of the v2 sprite-faces upgrade. Everything captured here serves a dual purpose:
+This directory is the raw provenance of the v2 visualization upgrade.
 
-1. **Honest record** of how v2 actually got built, including every prompt that worked AND every prompt that didn't.
-2. **Source material** for Neurons Lab Framework Battle course Module 5 Path A. The course extracts from this directory; the lessons cite real prompts, real failures, real iteration.
+**Final direction (2026-04-27):** colored region/mode discs with a white **silhouette icon** layered on top — continent shapes for Region mode, abstract icons for Income / Internet / Urban-Rural / Age. Six static continent assets + 13 mode icons; no per-cell uniqueness. The colored disc preserves the v1 visual language.
 
-**The single hardest rule:** capture *before* curating. The temptation to clean up before saving is what produces tutorial fiction. The first 7 prompts that didn't work are more pedagogically valuable than the 8th that did.
+## Direction history (so future readers don't relitigate)
+
+Two earlier directions were tried and abandoned before landing on silhouettes. Both are preserved in commit history; raw outputs from the first were intentionally kept (`01-region/variants-raw/`); intermediate face-grid outputs from the second were dropped to keep the repo light.
+
+1. **Per-region human face sprites** (Spike 1–3, ~$0.52). Generated diverse human portraits per region. **Failed because:** at icon scale, ethnicity isn't readable (the colored ring does all the regional work), and at hover/zoom scale the implied "this is one of the 60 East Asians" semantic mismatch is loud — a light-skinned face in an "Africa" cell is a problem the visualization has no answer for.
+2. **One-shot 100-figure portrait grid** via gpt-image-2 + slicer (~$0.17 + slicing). Cleaner style consistency than per-sprite generation. **Failed for the same semantic-mismatch reason** — generic globally-mixed faces meant Africa's 18 cells didn't look African, etc. The 144-cell sliced output was deleted from the repo as definitively unused; the slicer logic is gone too. Ask if needed.
+3. **Continent silhouettes + mode icons** (current — ~$0.76, 19 single-purpose static assets). **Works because:** a continent shape has no ethnicity to misrepresent. Income / age / etc. icons are abstract symbols, no human-coded baggage. The colored ring continues to do the categorical work; the icon is identity, not classification.
 
 ---
 
