@@ -43,7 +43,10 @@ describe('HundredPeople', () => {
 
   it('starts with region mode active', () => {
     const wrapper = mount(HundredPeople)
-    const activeButton = wrapper.find('.btn-primary')
+    // Scope to the mode-selector group so we don't match the Display toggle's
+    // active button (Dots vs Icons), which also uses btn-primary.
+    const modeGroup = wrapper.find('[aria-label="View mode selection"]')
+    const activeButton = modeGroup.find('.btn-primary')
     expect(activeButton.text()).toBe('By Region')
   })
 
@@ -132,5 +135,118 @@ describe('HundredPeople', () => {
     // Asia should show 59
     const asiaBadge = badges.find(b => b.text() === '59')
     expect(asiaBadge).toBeDefined()
+  })
+
+  // ─── v2 Display toggle (Dots vs Icons) ──────────────────────────────────
+
+  describe('Display toggle (v2)', () => {
+    it('renders both "Dots" and "Icons" toggle buttons', () => {
+      const wrapper = mount(HundredPeople)
+      const toggleGroup = wrapper.find('[aria-label="Display style"]')
+      expect(toggleGroup.exists()).toBe(true)
+      const buttons = toggleGroup.findAll('button')
+      expect(buttons.length).toBe(2)
+      expect(buttons[0].text()).toBe('Dots')
+      expect(buttons[1].text()).toBe('Icons')
+    })
+
+    it('defaults to Dots (useIcons === false)', () => {
+      const wrapper = mount(HundredPeople)
+      const toggleGroup = wrapper.find('[aria-label="Display style"]')
+      const dotsBtn = toggleGroup.findAll('button')[0]
+      const iconsBtn = toggleGroup.findAll('button')[1]
+      expect(dotsBtn.attributes('aria-pressed')).toBe('true')
+      expect(iconsBtn.attributes('aria-pressed')).toBe('false')
+      expect(dotsBtn.classes()).toContain('btn-primary')
+      expect(iconsBtn.classes()).toContain('btn-ghost')
+    })
+
+    it('renders no icon overlays in default Dots mode', () => {
+      const wrapper = mount(HundredPeople)
+      const dots = wrapper.findAll('.grid > button')
+      const dotsWithIcon = dots.filter(d => d.find('img').exists())
+      expect(dotsWithIcon.length).toBe(0)
+    })
+
+    it('renders an icon overlay on every dot after switching to Icons', async () => {
+      const wrapper = mount(HundredPeople)
+      const iconsBtn = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      await iconsBtn.trigger('click')
+
+      const dots = wrapper.findAll('.grid > button')
+      expect(dots.length).toBe(100)
+      const dotsWithIcon = dots.filter(d => d.find('img').exists())
+      expect(dotsWithIcon.length).toBe(100)
+    })
+
+    it('icons in dots have non-empty src and aria-hidden', async () => {
+      const wrapper = mount(HundredPeople)
+      const iconsBtn = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      await iconsBtn.trigger('click')
+
+      const firstImg = wrapper.find('.grid > button img')
+      expect(firstImg.exists()).toBe(true)
+      expect(firstImg.attributes('src')).toBeTruthy()
+      expect(firstImg.attributes('aria-hidden')).toBe('true')
+      expect(firstImg.attributes('alt')).toBe('')
+    })
+
+    it('first 59 dots use the Asia icon in default region mode (with Icons on)', async () => {
+      const wrapper = mount(HundredPeople)
+      const iconsBtn = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      await iconsBtn.trigger('click')
+
+      const dots = wrapper.findAll('.grid > button')
+      // First 59 are Asia per regions.js; their icon src should all match.
+      const firstAsiaImg = dots[0].find('img').attributes('src')
+      const lastAsiaImg = dots[58].find('img').attributes('src')
+      expect(firstAsiaImg).toBe(lastAsiaImg)
+      // Dot 59 is the first African dot, different category, different icon
+      const firstAfricaImg = dots[59].find('img').attributes('src')
+      expect(firstAfricaImg).not.toBe(firstAsiaImg)
+    })
+
+    it('toggling back to Dots removes all icon overlays', async () => {
+      const wrapper = mount(HundredPeople)
+      const buttons = wrapper.find('[aria-label="Display style"]').findAll('button')
+      const dotsBtn = buttons[0]
+      const iconsBtn = buttons[1]
+
+      await iconsBtn.trigger('click')
+      expect(wrapper.findAll('.grid > button img').length).toBe(100)
+
+      await dotsBtn.trigger('click')
+      expect(wrapper.findAll('.grid > button img').length).toBe(0)
+    })
+
+    it('legend swatches show icons when Icons mode is active', async () => {
+      const wrapper = mount(HundredPeople)
+      // Default: legend swatches have no icon
+      const swatchesDots = wrapper.findAll('.legend-swatch')
+      expect(swatchesDots.length).toBeGreaterThan(0)
+      expect(swatchesDots.filter(s => s.find('img').exists()).length).toBe(0)
+
+      const iconsBtn = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      await iconsBtn.trigger('click')
+
+      const swatchesIcons = wrapper.findAll('.legend-swatch')
+      expect(swatchesIcons.filter(s => s.find('img').exists()).length).toBe(swatchesIcons.length)
+    })
+
+    it('Icons mode persists across mode switches', async () => {
+      const wrapper = mount(HundredPeople)
+      const iconsBtn = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      await iconsBtn.trigger('click')
+
+      // Now switch the view mode (Region -> Income)
+      const incomeBtn = wrapper.findAll('button').find(b => b.text() === 'By Income')
+      await incomeBtn.trigger('click')
+      await waitForAnimation()
+
+      // Icons should still be on after the mode change
+      const iconsBtnAfter = wrapper.find('[aria-label="Display style"]').findAll('button')[1]
+      expect(iconsBtnAfter.attributes('aria-pressed')).toBe('true')
+      expect(wrapper.findAll('.grid > button img').length).toBe(100)
+    })
   })
 })

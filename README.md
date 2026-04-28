@@ -2,6 +2,8 @@
 
 An interactive data visualization app that helps you understand our world through intuitive, accessible visualizations. Built with Vue 3 and modern web technologies.
 
+> **v2 shipped as an opt-in toggle (April 2026):** the 100 People view now offers a Display: Dots / Icons switch. v1 colored dots remain the default; v2 layers a white silhouette icon (continent shape for Region mode, abstract icon for Income / Internet / Urban-Rural / Age) on top of the same colored disc. The v1 view is preserved verbatim and tagged `v1.0-dots` for reference. Two earlier directions (per-region face sprites; one-shot 100-figure portrait grid) were tried and abandoned — see [`SESSION_LOG.md`](SESSION_LOG.md) Session 132 and [`journey/v2/README.md`](journey/v2/README.md) for the design history.
+
 ## Features
 
 ### The World as 100 People

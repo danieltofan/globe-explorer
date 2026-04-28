@@ -7,6 +7,10 @@ const hoveredGroup = ref(null)
 const isTransitioning = ref(false)
 const transitionPhase = ref('idle') // 'idle' | 'out' | 'shuffle' | 'in'
 
+// v2: silhouette icons layered on the colored dots. Default off (v1 dots) until
+// the v2 view is proven; users can opt in via the Display toggle.
+const useIcons = ref(false)
+
 // Storytelling mode
 const isStorytelling = ref(false)
 const currentFactIndex = ref(0)
@@ -74,7 +78,8 @@ const dots = computed(() => {
         id: dotIndex++,
         group: group.id,
         groupName: group.name,
-        color: group.color
+        color: group.color,
+        icon: group.icon
       })
     }
   }
@@ -83,12 +88,13 @@ const dots = computed(() => {
 })
 
 // Calculate staggered delay for each dot (wave pattern from top-left to bottom-right)
+// The diagonal index (row + col) ranges 0..18 in a 10x10 grid. Multiplying by
+// 11ms spreads the cascade over ~200ms total — fast enough to feel snappy,
+// slow enough that the wave is visibly diagonal.
 function getDotDelay(index) {
   const row = Math.floor(index / 10)
   const col = index % 10
-  // Diagonal wave: delay based on row + col
   const diagonalIndex = row + col
-  // Max diagonal is 18 (row 9 + col 9), spread over ~200ms for snappier feel
   return diagonalIndex * 11
 }
 
@@ -165,6 +171,25 @@ function handleLegendKeydown(event, groupId) {
       </div>
     </div>
 
+    <!-- Display Toggle (v1 dots vs v2 colored disc + silhouette icon) -->
+    <div class="flex justify-center items-center gap-2 mb-4" role="group" aria-label="Display style">
+      <span class="text-sm text-base-content/70">Display:</span>
+      <button
+        type="button"
+        @click="useIcons = false"
+        class="btn btn-xs"
+        :class="!useIcons ? 'btn-primary' : 'btn-ghost'"
+        :aria-pressed="!useIcons"
+      >Dots</button>
+      <button
+        type="button"
+        @click="useIcons = true"
+        class="btn btn-xs"
+        :class="useIcons ? 'btn-primary' : 'btn-ghost'"
+        :aria-pressed="useIcons"
+      >Icons</button>
+    </div>
+
     <!-- Mode Selector -->
     <div class="flex flex-wrap justify-center items-center gap-2 mb-8" role="group" aria-label="View mode selection">
       <button
@@ -204,17 +229,18 @@ function handleLegendKeydown(event, groupId) {
           :key="dot.id"
           type="button"
           class="aspect-square rounded-full cursor-pointer dot-animate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :style="{
-            backgroundColor: dot.color,
-            transitionDelay: `${getDotDelay(index)}ms`,
-            '--dot-color': dot.color
-          }"
           :class="{
             'opacity-30': hoveredGroup && hoveredGroup !== dot.group,
             'dot-highlighted': hoveredGroup === dot.group,
             'dot-out': transitionPhase === 'out',
             'dot-in': transitionPhase === 'in' || transitionPhase === 'shuffle',
-            'dot-idle': transitionPhase === 'idle'
+            'dot-idle': transitionPhase === 'idle',
+            'dot-with-icon': useIcons
+          }"
+          :style="{
+            backgroundColor: dot.color,
+            transitionDelay: `${getDotDelay(index)}ms`,
+            '--dot-color': dot.color
           }"
           :aria-label="`Person ${index + 1}: ${dot.groupName}`"
           :aria-pressed="hoveredGroup === dot.group"
@@ -223,7 +249,16 @@ function handleLegendKeydown(event, groupId) {
           @focus="hoveredGroup = dot.group"
           @blur="hoveredGroup = null"
           @keydown="handleDotKeydown($event, dot.group)"
-        />
+        >
+          <img
+            v-if="useIcons && dot.icon"
+            :src="dot.icon"
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            class="dot-icon"
+          />
+        </button>
       </div>
     </div>
 
@@ -246,10 +281,17 @@ function handleLegendKeydown(event, groupId) {
         @keydown="handleLegendKeydown($event, group.id)"
       >
         <div
-          class="w-3 h-3 rounded-full shadow-sm"
+          class="legend-swatch w-4 h-4 rounded-full shadow-sm flex items-center justify-center"
           :style="{ backgroundColor: group.color }"
           aria-hidden="true"
-        />
+        >
+          <img
+            v-if="useIcons && group.icon"
+            :src="group.icon"
+            alt=""
+            class="legend-icon"
+          />
+        </div>
         <span class="font-medium text-sm">{{ group.name }}</span>
         <span class="badge badge-sm badge-ghost">{{ group.people }}</span>
       </button>
@@ -317,6 +359,34 @@ function handleLegendKeydown(event, groupId) {
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
+}
+
+/* v2: when icons are on, the dot becomes a flex container that centers the
+   silhouette. 80% size leaves a ~10% colored halo on each side so the
+   region/category color stays legible at 24-30px display, matching v1's
+   color-coded clustering signal. */
+.dot-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.dot-icon {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  /* Note: parent .dot-animate already transitions transform; the icon scales
+     with its parent automatically (CSS transforms cascade), so don't add a
+     redundant transform transition here. */
+}
+
+.legend-icon {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .dot-idle {

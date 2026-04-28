@@ -7,6 +7,144 @@
 **PageSpeed:** 100/100/100/100 (mobile)
 **Tests:** 153 passing, 92% coverage
 
+**Active initiative:** Globe Explorer v2 — the sprite-faces upgrade. See Session 130 (2026-04-24) for kickoff. This work double-serves as the Neurons Lab Framework Battle course's Module 5 Path A capstone content — the v1→v2 journey IS the lesson. Cross-reference: [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.6 + Appendix A-10.
+
+---
+
+## Session 132 - April 27-28, 2026 (v2 Production-Ready: Toggle + Continent/Mode Icons)
+
+**Focus:** v2 lands as an opt-in display toggle on the live HundredPeople component. After two abandoned design directions (per-region face sprites; one-shot 100-figure portrait grid), settled on colored discs with white silhouette icons — continents for Region mode, abstract icons for Income / Internet / Urban-Rural / Age. Production-ready and publishable.
+
+### Direction history (in priority of acceptance)
+
+1. **Per-region face sprites** (Spikes 1-3, ~$0.52). Failed: at icon scale, ethnicity isn't readable; at hover/zoom scale, semantic mismatches (light-skinned face in Africa cell) became loud. The colored ring carried all the regional signaling anyway.
+2. **One-shot 100-figure grid via gpt-image-2** (~$0.17). Same semantic-mismatch problem at scale.
+3. **Continent silhouettes + abstract mode icons** (current — ~$0.76, 19 static assets via gpt-image-1). Works because shapes/symbols don't carry the human-coded baggage faces did. Color encodes category; shape encodes identity, not classification.
+
+Total v2 exploration cost: ~$1.45 across all three directions.
+
+### Shipped on `feature/v2-sprite-faces` branch
+
+- **19 silhouette icons** (`src/assets/categories/`): 6 continents + 13 mode icons (income×6, internet×2, urban×2, age×3). Generated 1024×1024 → resized to 256×256 for production (217 KB total bundle weight, down from 5.4 MB).
+- **Display toggle** (`src/features/hundred-people/HundredPeople.vue`): new `useIcons` ref defaults to `false` (v1 dots stay default until v2 is proven). Toggle row above the mode selector. Each dot conditionally gains a centered 80% silhouette overlay; legend swatches gain matching icons. All existing behavior (mode transitions, hover, keyboard nav, storytelling, ARIA) preserved untouched.
+- **Data layer** (`src/shared/data/regions.js`): icon imports + `icon` field on every category in every viewMode. Vite-bundled via static URL imports.
+- **Tooling** (`journey/v2/tooling/`): `generate-continents.mjs`, `generate-mode-icons.mjs`, `process-continents.mjs` (sharp pipeline). Reproducible end-to-end.
+- **Tests:** 162 passing (was 153 — added 9 new v2-toggle tests in `HundredPeople.test.js` covering default state, click handling, icon rendering, legend overlay, mode-switch persistence).
+- **Light strip** of `journey/v2/`: deleted 25 MB of abandoned-direction artifacts (per-region spike outputs, empty per-mode skeletons, face-direction tooling). Kept the 1024×1024 source icons + regeneration scripts + lessons-learned markdown for course material reference.
+- **Auto-play storytelling TODO** logged in `regions.js`: only 10 facts across 5 modes means visible repetition during long auto-play; future polish item.
+
+### Build and test status
+
+- `npm test:run` → 162/162 green
+- `npm run build` → clean; total icon weight ~217 KB; pre-existing 500KB+ chunk warning is `LanguageSpace.js` (Three.js), not v2-related
+- Tag `v1.0-dots` still anchored at the canonical pre-v2 commit (`586cd15`)
+
+### Branch state at session end
+
+10 commits ahead of master, ready to merge. Master untouched per instructions.
+
+```
+09cd162 chore(v2): light strip — drop abandoned exploration artifacts (-25MB)
+bd1a54d perf(v2): resize icon assets from 1024x1024 to 256x256 (5.4MB → 217KB)
+dd3182f test(hundred-people): cover v2 toggle behavior (9 new tests)
+5be7bb3 docs(hundred-people): TODO — broaden auto-play storytelling rotation
+abe51f1 feat(hundred-people): v2 display toggle — colored disc + silhouette icon overlay
+d0de967 feat(v2): standalone preview page — 5 modes, dots-vs-icons compare
+b9313cd chore(v2): drop abandoned face-grid exploration; document direction history
+7d932c1 feat(v2): generate + process region + mode icon silhouettes (19 categories)
+0629ed3 chore(deps): add sharp for v2 image tooling
+5e51a2e chore(v2): capture spike outputs + generation scripts
+```
+
+### Next up
+
+- Daniel's review + merge strategy (squash vs fast-forward) → master
+- Push → GitHub Pages auto-deploys
+- Update README banner from "v2 in progress" to "v2 shipped as opt-in toggle"
+- Lighthouse spot-check on live to confirm 100/100 still holds
+- Course Module 2 authoring can begin using this work as the reference build (Neurons Lab Framework Battle)
+
+---
+
+## Session 131 - April 24, 2026 (v2 Scaffolding + v1.0-dots Tag)
+
+**Focus:** Scaffold the v2 build journal directory structure and lock in the capture protocol that will produce honest course material later. Tag the canonical pre-v2 commit so Lab course Modules 1–4 have an immutable reference point.
+
+### Completed
+
+- **Tag:** `v1.0-dots` created on `586cd15` (the last commit before v2 references existed). This is the canonical pre-v2 state that the Lab Framework Battle course's Modules 1–4 reference. Tags chosen over branches because tags don't rot. (Local only — Daniel pushes when ready.)
+- **Scaffolded `journey/v2/`** in the GE repo. Structure:
+  - `README.md` — full capture protocol + risk audit + course cross-reference
+  - Per-mode subdirectories (`01-region`, `02-age`, `03-urban-rural`, `04-internet`, `05-income`) each with `prompts.md`, `decisions.md`, `variants-raw/`, `variants-final/`. Region also has `diversity-audit.md`. Income also has `redesign.md` (the headline "what AI got wrong" story).
+  - `tooling/` with `tool-comparison.md` and `sprite-pipeline.md` skeletons.
+- **Capture protocol locked.** The hardest rule: capture *before* curating. Failed prompts and bad outputs are not deleted — they're the lesson. Reconstructed-after-the-fact prompts produce tutorial fiction. See `journey/v2/README.md` for the full 7-step checklist.
+- **Risk audit pinned in scaffolding** so each mode's notes file already states its risk level and approach (Income highest — design BEFORE prompting).
+
+### Next concrete step
+
+Tooling spike: try Flux 2 / DALL-E 3 / Imagen / Midjourney on a single Region prompt each, capture outputs to `journey/v2/01-region/variants-raw/`, document trade-offs in `journey/v2/tooling/tool-comparison.md`. **Pick by trying, not by hearsay.**
+
+### Status
+
+- Tag in place. Scaffolding committed.
+- No prompts sent yet. No variants generated yet.
+- Ready for the tooling spike whenever work resumes.
+
+---
+
+## Session 130 - April 24, 2026 (v2 Initiative Kickoff — Sprite Faces Upgrade)
+
+**Focus:** Lock the strategy for upgrading the 100 People view from colored dots to AI-generated sprite faces, and capture the cross-repo dependency with the Neurons Lab course.
+
+### Strategic decisions
+
+- **Live demo = v2.** When v2 ships, `globe-explorer.codecrank.ai` updates to the sprite-faces version. v2 is the wow moment that sells the Neurons Lab course; live demo must reflect it.
+- **Tag v1 before starting v2.** Create `v1.0-dots` git tag on current HEAD before the first v2 commit. The tag is immutable and serves as the permanent reference point for the Neurons Lab course's Modules 1–4 (which teach building the dots version). Tags chosen over branches because branches rot; tags don't.
+- **Optional v1 deploy** at `v1.globe-explorer.codecrank.ai` — TBD whether worth the small cost; provides a "what mine should look like at end of Module 4" comparison for course students. Decide later.
+- **Journey capture is non-negotiable.** Every prompt, every failed AI output, every design decision must be logged in real time during v2 development. The captured journey IS the Module 5 Path A lesson. Reconstruct-after-the-fact produces sanitized fiction; the real process is what makes the lesson authentic.
+
+### Five sprite modes — design-risk audit
+
+The five 100-People modes are NOT equally safe. Risk levels locked:
+
+| Mode | Risk | Approach |
+|---|---|---|
+| Region (faces) | Low if executed well | 15–20 variants per region; commit to within-region diversity, not stereotyping |
+| Age | Low | Infant → child → adult → elderly progression |
+| Urban/Rural | Medium | Use building density (skyscraper / apartment / single home / single home with land); avoid "huts" caricature |
+| Internet | Medium | Real device tiers (smartphone / basic phone / no device); drop the abacus icon (orientalism trap) |
+| Income | **Highest** | Attire-as-class is globally unreliable. Replace with abstract symbols (coin counts, dwelling size, bar height) so income reads quantitatively. The income-mode redesign is itself the central "AI gave me what I asked for; what I asked for was wrong" lesson moment in Module 5. |
+
+### Technical shape
+
+- **Five sprite sheets**, one per mode. ~15–20 unique variants per sheet at 64×64 render size, packed as WebP at quality ~75. Target total payload <500KB across all five.
+- **Stable person identity:** each of the 100 dots gets a persistent `person-001..100` identity. Mode change swaps which sprite layer is shown for that person, not which person is in that grid cell. Same individual, different lens — richer storytelling than the current "shuffle on mode change" pattern.
+- **A11y:** per-dot `aria-label` ("Person from Asia, age 35, urban, has internet, middle income"). Faces are decorative; labels are the truth.
+
+### Build sequencing
+
+1. Tag `v1.0-dots` on current main (must precede v2 commit 1).
+2. Author sprite generation prompts; iterate on Region mode first (lowest risk, validates the pipeline).
+3. Run diversity audit on Region output before adopting; iterate until clean.
+4. Repeat per mode in risk order: Age → Urban/Rural → Internet → Income.
+5. Income mode requires explicit design phase before generation — DO NOT just prompt for "rich/middle/poor people"; design the abstract symbol approach first.
+6. Pack sprites; integrate with HundredPeople.vue using the stable-identity pattern.
+7. Tests: visual regression where possible, manual diversity-distribution checklist where not.
+8. Update README to flag v2 + reference v1 tag for course material.
+9. Deploy. Live demo flips to v2.
+10. Hand off journey log to Neurons Lab Module 5 Path A authoring (BUILD_PLAN Phase 8.6).
+
+### Cross-repo references
+
+- BUILD_PLAN Phase 8.6 (Module 5 capstone) is blocked on this v2 work shipping + the journey being captured.
+- BUILD_PLAN Appendix A-10 locks this v1/v2 strategy as the canonical decision.
+- Modules 1–4 of the Lab course are NOT blocked by this v2 work.
+
+### Status
+
+- **Open.** Strategy locked, no code yet.
+- Next concrete step when work resumes: create the `v1.0-dots` tag.
+
 ---
 
 ## Session 129 - December 4, 2025
