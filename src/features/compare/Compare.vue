@@ -1,25 +1,76 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { countries } from '../countries-cartogram/countries'
 
 // State
 const country1Code = ref('US')
 const country2Code = ref('CN')
-const searchQuery = ref('')
 
-// Sorted countries for dropdown
+// Per-side search queries — let the user type to narrow 195 countries
+// down to the few they're looking for. Each select has its own search so
+// users can refine the two sides independently.
+const searchQuery1 = ref('')
+const searchQuery2 = ref('')
+
+// Sorted full list — used as the source for filtering
 const sortedCountries = computed(() => {
   return [...countries].sort((a, b) => a.name.localeCompare(b.name))
 })
 
-// Filtered countries for search
-const filteredCountries = computed(() => {
-  if (!searchQuery.value) return sortedCountries.value
-  const q = searchQuery.value.toLowerCase()
+// Two layers of computed lists per side:
+//   matches  = post-filter only         (drives the typeahead auto-select)
+//   filtered = matches + pinned current (drives the <select>'s options)
+// We need both because the <select> must always have an option matching its
+// v-model value (otherwise the control loses its label), but the typeahead
+// shouldn't jump to a country just because we pinned it.
+
+function rawMatches(query) {
+  if (!query) return sortedCountries.value
+  const q = query.toLowerCase()
   return sortedCountries.value.filter(c =>
     c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
   )
-})
+}
+
+const matches1 = computed(() => rawMatches(searchQuery1.value))
+const matches2 = computed(() => rawMatches(searchQuery2.value))
+
+// withCurrent pins the currently-selected country to the dropdown so the
+// <select> can always display its label, even when the search would have
+// filtered it out.
+function withCurrent(list, currentCode) {
+  if (list.some(c => c.code === currentCode)) return list
+  const current = sortedCountries.value.find(c => c.code === currentCode)
+  return current ? [current, ...list] : list
+}
+
+const filtered1 = computed(() => withCurrent(matches1.value, country1Code.value))
+const filtered2 = computed(() => withCurrent(matches2.value, country2Code.value))
+
+// Typeahead: as the user types, auto-select the first match — but ONLY if
+// the currently-selected country no longer matches the query. This keeps
+// the user on US when they type "uni" (US still matches), and jumps them
+// to Germany when they type "germ" (US no longer matches).
+//
+// We do NOT clear the search here — only the @change on the <select> does
+// (that fires on real user interaction with the dropdown). This lets the
+// user keep refining their query letter by letter without losing their
+// search text.
+function typeaheadFor(matches, query, currentCode, set) {
+  if (!query || matches.length === 0) return
+  const q = query.toLowerCase()
+  const current = sortedCountries.value.find(c => c.code === currentCode)
+  const currentStillMatches = current && (
+    current.name.toLowerCase().includes(q) || current.code.toLowerCase().includes(q)
+  )
+  if (!currentStillMatches) set(matches[0].code)
+}
+
+// We watch `matches` (the filtered list) rather than `searchQuery` directly
+// so the typeahead callback always sees the post-filter list synchronously
+// — no risk of reading a stale or about-to-be-recomputed value.
+watch(matches1, (m) => typeaheadFor(m, searchQuery1.value, country1Code.value, c => country1Code.value = c))
+watch(matches2, (m) => typeaheadFor(m, searchQuery2.value, country2Code.value, c => country2Code.value = c))
 
 // Selected countries
 const country1 = computed(() => countries.find(c => c.code === country1Code.value))
@@ -63,11 +114,16 @@ function getComparison(metric) {
   }
 }
 
-// Swap countries
+// Swap countries. Also clear both searches — leaving stale queries after a
+// swap creates a confusing state where the dropdown is filtered to a country
+// the user didn't pick (e.g. side 1 says "germ" filtering to Germany, but
+// the just-swapped-in country is China).
 function swapCountries() {
   const temp = country1Code.value
   country1Code.value = country2Code.value
   country2Code.value = temp
+  searchQuery1.value = ''
+  searchQuery2.value = ''
 }
 
 // Get flag URL
@@ -85,14 +141,24 @@ function getFlagUrl(code) {
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8" role="group" aria-label="Country selection">
       <!-- Country 1 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country1-search" class="sr-only">Search to filter the first country dropdown</label>
+        <input
+          id="country1-search"
+          v-model="searchQuery1"
+          type="search"
+          placeholder="Search countries…"
+          class="input input-bordered input-sm w-full mb-2"
+          aria-controls="country1-select"
+        />
         <label for="country1-select" class="sr-only">Select first country</label>
         <select
           id="country1-select"
           v-model="country1Code"
+          @change="searchQuery1 = ''"
           class="select select-bordered w-full text-lg"
           aria-label="First country to compare"
         >
-          <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
+          <option v-for="c in filtered1" :key="c.code" :value="c.code">
             {{ c.name }}
           </option>
         </select>
@@ -112,14 +178,24 @@ function getFlagUrl(code) {
 
       <!-- Country 2 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country2-search" class="sr-only">Search to filter the second country dropdown</label>
+        <input
+          id="country2-search"
+          v-model="searchQuery2"
+          type="search"
+          placeholder="Search countries…"
+          class="input input-bordered input-sm w-full mb-2"
+          aria-controls="country2-select"
+        />
         <label for="country2-select" class="sr-only">Select second country</label>
         <select
           id="country2-select"
           v-model="country2Code"
+          @change="searchQuery2 = ''"
           class="select select-bordered w-full text-lg"
           aria-label="Second country to compare"
         >
-          <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
+          <option v-for="c in filtered2" :key="c.code" :value="c.code">
             {{ c.name }}
           </option>
         </select>
