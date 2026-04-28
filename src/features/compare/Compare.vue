@@ -1,25 +1,46 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { countries } from '../countries-cartogram/countries'
 
 // State
 const country1Code = ref('US')
 const country2Code = ref('CN')
-const searchQuery = ref('')
 
-// Sorted countries for dropdown
+// Per-side search queries — let the user type to narrow 195 countries
+// down to the few they're looking for. Each select has its own search so
+// users can refine the two sides independently.
+const searchQuery1 = ref('')
+const searchQuery2 = ref('')
+
+// Sorted full list — used as the source for filtering
 const sortedCountries = computed(() => {
   return [...countries].sort((a, b) => a.name.localeCompare(b.name))
 })
 
-// Filtered countries for search
-const filteredCountries = computed(() => {
-  if (!searchQuery.value) return sortedCountries.value
-  const q = searchQuery.value.toLowerCase()
-  return sortedCountries.value.filter(c =>
+// Filter helper: case-insensitive match on country name or code.
+// Always keeps the currently-selected country in the result so the dropdown
+// can still display its label even after the user types a non-matching query.
+function filterCountries(query, currentCode) {
+  if (!query) return sortedCountries.value
+  const q = query.toLowerCase()
+  const results = sortedCountries.value.filter(c =>
     c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
   )
-})
+  if (!results.some(c => c.code === currentCode)) {
+    const current = sortedCountries.value.find(c => c.code === currentCode)
+    if (current) results.unshift(current)
+  }
+  return results
+}
+
+const filtered1 = computed(() => filterCountries(searchQuery1.value, country1Code.value))
+const filtered2 = computed(() => filterCountries(searchQuery2.value, country2Code.value))
+
+// Clear the search field once a selection is made (or after a swap) — the
+// user has gotten what they wanted from the search and an empty field is
+// less visually noisy than a stale query.
+watch(country1Code, () => { searchQuery1.value = '' })
+watch(country2Code, () => { searchQuery2.value = '' })
 
 // Selected countries
 const country1 = computed(() => countries.find(c => c.code === country1Code.value))
@@ -85,6 +106,15 @@ function getFlagUrl(code) {
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8" role="group" aria-label="Country selection">
       <!-- Country 1 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country1-search" class="sr-only">Search to filter the first country dropdown</label>
+        <input
+          id="country1-search"
+          v-model="searchQuery1"
+          type="search"
+          placeholder="Search countries…"
+          class="input input-bordered input-sm w-full mb-2"
+          aria-controls="country1-select"
+        />
         <label for="country1-select" class="sr-only">Select first country</label>
         <select
           id="country1-select"
@@ -92,7 +122,7 @@ function getFlagUrl(code) {
           class="select select-bordered w-full text-lg"
           aria-label="First country to compare"
         >
-          <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
+          <option v-for="c in filtered1" :key="c.code" :value="c.code">
             {{ c.name }}
           </option>
         </select>
@@ -112,6 +142,15 @@ function getFlagUrl(code) {
 
       <!-- Country 2 -->
       <div class="flex-1 w-full max-w-xs">
+        <label for="country2-search" class="sr-only">Search to filter the second country dropdown</label>
+        <input
+          id="country2-search"
+          v-model="searchQuery2"
+          type="search"
+          placeholder="Search countries…"
+          class="input input-bordered input-sm w-full mb-2"
+          aria-controls="country2-select"
+        />
         <label for="country2-select" class="sr-only">Select second country</label>
         <select
           id="country2-select"
@@ -119,7 +158,7 @@ function getFlagUrl(code) {
           class="select select-bordered w-full text-lg"
           aria-label="Second country to compare"
         >
-          <option v-for="c in sortedCountries" :key="c.code" :value="c.code">
+          <option v-for="c in filtered2" :key="c.code" :value="c.code">
             {{ c.name }}
           </option>
         </select>

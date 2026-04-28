@@ -39,4 +39,71 @@ describe('Compare', () => {
     const wrapper = mount(Compare)
     expect(wrapper.text()).toContain('Quick Facts')
   })
+
+  // ─── Search filters the country dropdowns ────────────────────────────────
+
+  describe('search', () => {
+    it('renders a search input above each country selector', () => {
+      const wrapper = mount(Compare)
+      const searches = wrapper.findAll('input[type="search"]')
+      expect(searches.length).toBe(2)
+    })
+
+    it('search inputs default to empty', () => {
+      const wrapper = mount(Compare)
+      const searches = wrapper.findAll('input[type="search"]')
+      expect(searches[0].element.value).toBe('')
+      expect(searches[1].element.value).toBe('')
+    })
+
+    it('typing in a search input filters that select to matching countries', async () => {
+      const wrapper = mount(Compare)
+      const search1 = wrapper.findAll('input[type="search"]')[0]
+      await search1.setValue('germ')
+
+      const select1 = wrapper.find('#country1-select')
+      const optionTexts = select1.findAll('option').map(o => o.text())
+      // Germany should match; the always-visible currently-selected (US)
+      // should also be included so the dropdown still shows its label.
+      expect(optionTexts.some(t => t === 'Germany')).toBe(true)
+      expect(optionTexts.some(t => t === 'United States')).toBe(true)
+      // Most other countries should NOT be in the filtered list
+      expect(optionTexts.length).toBeLessThan(20)
+    })
+
+    it('search filters by country code as well as name', async () => {
+      const wrapper = mount(Compare)
+      const search1 = wrapper.findAll('input[type="search"]')[0]
+      await search1.setValue('JP')
+
+      const select1 = wrapper.find('#country1-select')
+      const optionTexts = select1.findAll('option').map(o => o.text())
+      expect(optionTexts.some(t => t === 'Japan')).toBe(true)
+    })
+
+    it('search input clears after a selection is made', async () => {
+      const wrapper = mount(Compare)
+      const search1 = wrapper.findAll('input[type="search"]')[0]
+      await search1.setValue('germ')
+      expect(search1.element.value).toBe('germ')
+
+      const select1 = wrapper.find('#country1-select')
+      await select1.setValue('DE')
+      // Watch on country1Code clears searchQuery1
+      expect(search1.element.value).toBe('')
+    })
+
+    it('search inputs are independent per side', async () => {
+      const wrapper = mount(Compare)
+      const [search1, search2] = wrapper.findAll('input[type="search"]')
+      await search1.setValue('france')
+      await search2.setValue('brazil')
+
+      const select1 = wrapper.find('#country1-select')
+      const select2 = wrapper.find('#country2-select')
+
+      expect(select1.findAll('option').map(o => o.text()).some(t => t === 'France')).toBe(true)
+      expect(select2.findAll('option').map(o => o.text()).some(t => t === 'Brazil')).toBe(true)
+    })
+  })
 })
