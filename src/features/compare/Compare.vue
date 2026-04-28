@@ -17,30 +17,60 @@ const sortedCountries = computed(() => {
   return [...countries].sort((a, b) => a.name.localeCompare(b.name))
 })
 
-// Filter helper: case-insensitive match on country name or code.
-// Always keeps the currently-selected country in the result so the dropdown
-// can still display its label even after the user types a non-matching query.
-function filterCountries(query, currentCode) {
+// Two layers of computed lists per side:
+//   matches  = post-filter only         (drives the typeahead auto-select)
+//   filtered = matches + pinned current (drives the <select>'s options)
+// We need both because the <select> must always have an option matching its
+// v-model value (otherwise the control loses its label), but the typeahead
+// shouldn't jump to a country just because we pinned it.
+
+function rawMatches(query) {
   if (!query) return sortedCountries.value
   const q = query.toLowerCase()
-  const results = sortedCountries.value.filter(c =>
+  return sortedCountries.value.filter(c =>
     c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
   )
-  if (!results.some(c => c.code === currentCode)) {
-    const current = sortedCountries.value.find(c => c.code === currentCode)
-    if (current) results.unshift(current)
-  }
-  return results
 }
 
-const filtered1 = computed(() => filterCountries(searchQuery1.value, country1Code.value))
-const filtered2 = computed(() => filterCountries(searchQuery2.value, country2Code.value))
+const matches1 = computed(() => rawMatches(searchQuery1.value))
+const matches2 = computed(() => rawMatches(searchQuery2.value))
 
-// Clear the search field once a selection is made (or after a swap) — the
-// user has gotten what they wanted from the search and an empty field is
-// less visually noisy than a stale query.
-watch(country1Code, () => { searchQuery1.value = '' })
-watch(country2Code, () => { searchQuery2.value = '' })
+// withCurrent pins the currently-selected country to the dropdown so the
+// <select> can always display its label, even when the search would have
+// filtered it out.
+function withCurrent(list, currentCode) {
+  if (list.some(c => c.code === currentCode)) return list
+  const current = sortedCountries.value.find(c => c.code === currentCode)
+  return current ? [current, ...list] : list
+}
+
+const filtered1 = computed(() => withCurrent(matches1.value, country1Code.value))
+const filtered2 = computed(() => withCurrent(matches2.value, country2Code.value))
+
+// Typeahead: as the user types, auto-select the first match — but ONLY if
+// the currently-selected country no longer matches the query. This keeps
+// the user on US when they type "uni" (US still matches), and jumps them
+// to Germany when they type "germ" (US no longer matches).
+//
+// We do NOT clear the search here — only the @change on the <select> does
+// (that fires on real user interaction with the dropdown). This lets the
+// user keep refining their query letter by letter without losing their
+// search text.
+function typeaheadFor(matches, query, currentCode, set) {
+  if (!query || matches.length === 0) return
+  const q = query.toLowerCase()
+  const current = sortedCountries.value.find(c => c.code === currentCode)
+  const currentStillMatches = current && (
+    current.name.toLowerCase().includes(q) || current.code.toLowerCase().includes(q)
+  )
+  if (!currentStillMatches) set(matches[0].code)
+}
+
+// We watch `matches` (the filtered list) rather than `searchQuery` directly
+// so the typeahead callback always sees the post-filter list synchronously
+// — no risk of reading a stale or about-to-be-recomputed value.
+watch(matches1, (m) => typeaheadFor(m, searchQuery1.value, country1Code.value, c => country1Code.value = c))
+watch(matches2, (m) => typeaheadFor(m, searchQuery2.value, country2Code.value, c => country2Code.value = c))
 
 // Selected countries
 const country1 = computed(() => countries.find(c => c.code === country1Code.value))
@@ -84,11 +114,16 @@ function getComparison(metric) {
   }
 }
 
-// Swap countries
+// Swap countries. Also clear both searches — leaving stale queries after a
+// swap creates a confusing state where the dropdown is filtered to a country
+// the user didn't pick (e.g. side 1 says "germ" filtering to Germany, but
+// the just-swapped-in country is China).
 function swapCountries() {
   const temp = country1Code.value
   country1Code.value = country2Code.value
   country2Code.value = temp
+  searchQuery1.value = ''
+  searchQuery2.value = ''
 }
 
 // Get flag URL
@@ -119,6 +154,7 @@ function getFlagUrl(code) {
         <select
           id="country1-select"
           v-model="country1Code"
+          @change="searchQuery1 = ''"
           class="select select-bordered w-full text-lg"
           aria-label="First country to compare"
         >
@@ -155,6 +191,7 @@ function getFlagUrl(code) {
         <select
           id="country2-select"
           v-model="country2Code"
+          @change="searchQuery2 = ''"
           class="select select-bordered w-full text-lg"
           aria-label="Second country to compare"
         >
