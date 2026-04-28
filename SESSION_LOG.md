@@ -7,7 +7,58 @@
 **PageSpeed:** 100/100/100/100 (mobile)
 **Tests:** 153 passing, 92% coverage
 
-**Active initiative:** Globe Explorer v2 — the sprite-faces upgrade. See Session 130 (2026-04-24) for kickoff. This work double-serves as the Neurons Lab Framework Battle course's Module 5 Path A capstone content — the v1→v2 journey IS the lesson. Cross-reference: [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.6 + Appendix A-10.
+**Tests:** 172 passing (was 153 before v2 work)
+**Live status:** v2 + Compare typeahead shipped 2026-04-28 (see Session 133).
+**Active initiative:** Module 1+ authoring for the Neurons Lab Framework Battle course; Compare and HundredPeople will serve as the reference implementations students rebuild with AI assistance. Cross-reference: [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.
+
+---
+
+## Session 133 - April 28, 2026 (v2 Live + Compare Typeahead Shipped)
+
+**Focus:** merge v2 to master and publish; add typeahead search to the Compare view; verify live deploy.
+
+### Shipped to master + live
+
+Two squashed commits landed on `master` and pushed to GitHub Pages:
+
+```
+b0579c9 feat(compare): typeahead-enabled country search
+bc85bf7 feat(hundred-people): v2 display toggle — colored disc + silhouette icon overlay
+```
+
+`v1.0-dots` tag pushed to origin (was lightweight; needed an explicit `git push origin v1.0-dots` after `--follow-tags` skipped it).
+
+### Compare typeahead
+
+Added per-side search inputs above each country selector with true typeahead — typing auto-selects the first match if the currently-selected country no longer matches the query (e.g. type "germ" while US is selected → jumps to Germany; type "uni" while US is selected → stays on US, still matches). Search text persists during typing so the user can keep refining; only a real dropdown pick or the swap button clears the search.
+
+Implementation pattern worth noting (will become a Module 1 lesson moment): two-layer computeds per side — `matches` (post-filter only, drives the typeahead auto-select) and `filtered` (matches + always-pinned current, drives the `<select>`'s options so the control retains its label). We watch `matches` (not the raw query) so the typeahead callback always sees the post-filter list synchronously.
+
+Closes a dead-code gap: `searchQuery` and `filteredCountries` were defined in `<script setup>` since the original Compare commit but never referenced by the template. The original author clearly intended a search input that was never built.
+
+Code-review findings addressed before merge: swap button now clears both search queries (avoided stale-text-vs-current-selection confusion); misleading test comment about a non-existent watcher corrected; clarifying comments added about the two-layer pattern and why we watch `matches` not the raw query.
+
+### Tests
+
+172/172 green (was 162; +10 new in `Compare.test.js` covering search rendering, name/code filtering, typeahead auto-select, current-selection preservation, search persistence, swap-clears-both, per-side independence).
+
+### Verification (live)
+
+- `git fetch` → master matches origin at `b0579c9` ✓
+- `git ls-remote --tags origin v1.0-dots` → tag on origin ✓
+- `curl -sI https://globe-explorer.codecrank.ai` → 200 OK ✓
+- Live bundle hash changed post-deploy; `assets/asia-*.png` returns 200 (icon assets shipped) ✓
+- Daniel verified the toggle and typeahead work in the live UI
+
+### Future-pass items captured but not done
+
+- Auto-play storytelling rotation: only 10 facts across 5 modes makes repetition visible during long auto-plays. TODO comment in `regions.js`.
+- Compare 3+ country comparison: discussed; deferred — adds little new pedagogy beyond what 100 People / Cartogram already teach.
+- Country shape silhouettes in Compare headers: discussed; rejected — flags do the recognizability work better than AI-generated silhouettes would, and generation risk doesn't pay off.
+
+### Next up
+
+Module 1 of the Neurons Lab Framework Battle course (Compare rebuild) can begin. Compare.vue is the reference implementation; the typeahead iteration here ("first commit shipped a non-working version, code review caught swap+search bug, second commit fixed it") is one of the "even gold first attempts need iteration" lesson moments the course will teach honestly.
 
 ---
 

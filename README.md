@@ -18,6 +18,7 @@ Imagine shrinking Earth's 8 billion people down to just 100. This visualization 
 - **By Age** — Children, working age, elderly distribution
 
 **Interactive Features:**
+- **Display toggle (Dots / Icons)** — switch between v1 colored dots and v2 colored discs with white silhouette icons (continent shape per region; abstract icon per income / internet / urban-rural / age category)
 - Hover over dots or legend to highlight groups
 - Smooth wave animations on mode transitions
 - Auto-play storytelling mode with 10 curated facts
@@ -58,8 +59,9 @@ Side-by-side comparison of any two countries across key metrics.
 
 **Features:**
 - Visual progress bars showing relative values
+- **Typeahead search** — type to filter the country dropdowns; auto-selects the first match (case-insensitive on name or country code)
 - Quick facts highlighting key differences
-- Swap button to reverse comparison
+- Swap button to reverse comparison (also clears search state)
 
 ## Tech Stack
 
