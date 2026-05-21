@@ -1,0 +1,15 @@
+# Cloudflare Pages cache headers.
+#
+# Vite emits content-hashed filenames under /assets/ — index-<hash>.js,
+# index-<hash>.css, HundredPeople-<hash>.js, the per-region PNG icons,
+# etc. The hash changes whenever the source changes, so these URLs are
+# safely cacheable for a long time (no stale-content risk: a new build
+# produces a new URL the HTML references). Cloudflare Pages defaults to
+# a conservative ~10 min TTL; PageSpeed flagged the resulting 60 KiB of
+# "use efficient cache lifetimes" savings on repeat visits.
+#
+# `immutable` is the second half of the win: tells the browser not to
+# revalidate at all during the max-age window. Combined with the 1-year
+# TTL, repeat visitors get zero network round-trips on every asset.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
