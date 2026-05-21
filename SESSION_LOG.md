@@ -8,8 +8,93 @@
 **Tests:** 153 passing, 92% coverage
 
 **Tests:** 172 passing (was 153 before v2 work)
-**Live status:** v2 + Compare typeahead shipped 2026-04-28 (see Session 133).
+**Live status:** v2 + Compare typeahead shipped 2026-04-28 (see Session 133); mobile PageSpeed restored to 100/100/100/100 on 2026-05-21 (see Session 134) — the v2 work had regressed mobile perf 100 → 98 and a11y 100 → 96.
 **Active initiative:** Module 1+ authoring for the Neurons Lab Framework Battle course; Compare and HundredPeople will serve as the reference implementations students rebuild with AI assistance. Cross-reference: [`C:\Code\CodeCrank\strategy\neurons-course\BUILD_PLAN.md`](../../CodeCrank/strategy/neurons-course/BUILD_PLAN.md) Phase 8.
+
+---
+
+## Session 134 - May 21, 2026 (Mobile PageSpeed Restored to 100/100/100/100)
+
+**Focus:** chase the small regressions the v2 ship introduced — mobile perf 100 → 98, a11y 100 → 96, plus a "5 empty frames" complaint on the Lighthouse filmstrip. Outcome: deployed, all four mobile scores back to 100, filmstrip filled with content from frame 1.
+
+### Diagnosis
+
+PageSpeed on the live URL surfaced three perf insights and one a11y finding:
+
+1. **Color-contrast failure** on `<span class="text-sm text-base-content/70">Display:</span>` — the v2 Display toggle label. `text-base-content/70` opacity fails WCAG AA at the default theme. Weight=7 audit, so it accounted for the full 4-point a11y drop.
+2. **Render-blocking requests — est savings 300 ms.** The auto-injected `<link rel="stylesheet" href="/assets/index-<hash>.css">` blocked the initial render of every page paint on Slow 4G.
+3. **Use efficient cache lifetimes — est savings 60 KiB.** Cloudflare Pages defaulted to a ~10 min TTL on every asset. The `/assets/` directory is content-hashed (immutable by construction), so it's safely cacheable for a year with `immutable` to skip revalidation entirely.
+4. **Speed Index 3.9 s** with 5–6 fully-blank filmstrip frames at the start of the load. The page is a pure-SPA Vue app: nothing renders until JS executes Vue's mount.
+
+### Fix 1 — a11y (Lab `f15fef9` part 1)
+
+One-character class change: `text-base-content/70` → `/85` on the "Display:" label. Confirmed contrast ratio clears 4.5:1 with margin. a11y 96 → 100.
+
+### Fix 2 — static LCP skeleton in #app (Lab `f15fef9` part 2)
+
+Added a static skeleton inside `<div id="app">` in `index.html` mirroring HundredPeople.vue's header block (same wrapper hierarchy, same h1 classes, `aria-hidden="true"` on the wrapper so screen readers don't announce the h1 twice in the pre-mount window). Vue's `createApp(App).mount('#app')` replaces innerHTML on mount; the skeleton acts purely as an early-paint placeholder that visually matches what HundredPeople renders.
+
+**This step alone was a NET REGRESSION on Lighthouse score.** Local measurement showed perf 94 → 91-94 (variance) because Vue's mount() had extra DOM to clear, bumping TBT from ~103 ms to a 89-235 ms band. Speed Index dropped beautifully (3.7 s → 1.2 s — the empty-frames win), but the score formula weights TBT (30) more than SI (10). Without the next fix, the skeleton was sitting in HTML but invisible until the CSS link finished downloading.
+
+### Fix 3 — inline the main CSS bundle (Lab `af5c493`)
+
+The unlock. `vite.config.js` gains an `inlineMainCssPlugin()` that runs in `transformIndexHtml.post` mode:
+
+1. Walks `ctx.bundle` for assets matching `assets/index-*.css`
+2. Strips the auto-injected `<link rel="stylesheet">` for each
+3. Injects the CSS content as `<style>...</style>` just before `</head>`
+
+Route-specific CSS chunks (e.g. `HundredPeople-<hash>.css`) are **not** inlined — they're loaded lazily by their route chunks and aren't in the critical path.
+
+The mechanism that makes this work: combined with the skeleton from Fix 2, the browser can paint the LCP element (h1) **as soon as the HTML byte stream is parsed**. No external CSS round-trip. No render-blocking link. The skeleton + inline CSS pair is the winning combination — either alone is a wash or a regression; together they shift LCP earlier and fill the filmstrip with content from frame 1.
+
+### Fix 4 — `_headers` for immutable cache lifetimes (Lab `af5c493`)
+
+New `public/_headers` file (Cloudflare Pages auto-picks up):
+
+```
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+```
+
+Doesn't affect Lighthouse cold-load scoring (Lighthouse only does cold loads) but addresses PageSpeed's "cache lifetimes" insight on repeat visits. Vite content-hashes filenames so the URL changes on every content change → 1-year `immutable` is safe.
+
+### Results (live PageSpeed post-deploy)
+
+| Metric | Pre-fix | Post-fix |
+|---|---|---|
+| Performance | **98** | **100** |
+| Accessibility | **96** | **100** |
+| Best Practices | 100 | 100 |
+| SEO | 100 | 100 |
+| FCP | 1.3 s | **0.9 s** |
+| LCP | 1.4 s | 1.4 s |
+| TBT | 0 ms | 0 ms |
+| Speed Index | **3.9 s** | **0.9 s** |
+| CLS | 0 | 0.034 |
+| Filmstrip | 5-6 blank, then full | 8 frames all filled |
+
+### The performance-improving technique, distilled
+
+For a pure-SPA Vue (or React, Svelte, etc.) app that scores below 100 on mobile PageSpeed despite already-good core web vitals, the two-step pattern is:
+
+1. **Put the LCP element into static HTML inside the mount target.** Vue/React replaces the mount target's innerHTML on mount, so this is purely an early-paint placeholder — but it needs styles to be visible. Match the runtime markup + classes; on mount, the framework swaps it out with no visible flash if the markup is close.
+2. **Inline the main CSS bundle** via a tiny Vite plugin (`transformIndexHtml.post`). The render-blocking external CSS request is replaced with a `<style>` tag that's available from HTML parse time. Combined with step 1, the skeleton paints at HTML-parse — usually 800-1000ms ahead of the SPA mount.
+
+**Without step 2, step 1 is a regression** (the skeleton DOM exists but is invisible while CSS loads, AND the framework's mount has more DOM to clear → TBT cost without LCP benefit). The pair is what wins.
+
+Route-specific CSS stays code-split and lazy-loaded. Cache headers + `immutable` close the repeat-visit gap separately. This pattern is portable to any SPA where the main CSS bundle is under ~30 KiB gzipped (above that, inlining starts costing more in HTML payload than it saves in network round-trips).
+
+### Tests
+
+172/172 still green. No test changes — the a11y class flip is utility-only, the skeleton is in `index.html` (no Vue render path touched), the Vite plugin runs at build time only.
+
+### Commits
+
+```
+af5c493 perf: inline main CSS bundle + immutable cache headers for /assets/*
+f15fef9 fix(a11y+lcp): restore mobile a11y to 100 + drop Speed Index 3x via static LCP skeleton
+```
 
 ---
 

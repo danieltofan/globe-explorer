@@ -182,9 +182,23 @@ This app follows WCAG 2.1 AA guidelines:
 
 ## Performance
 
-This app achieves **100/100/100/100** on Google PageSpeed Insights (Performance, Accessibility, Best Practices, SEO).
+This app achieves **100/100/100/100** on Google PageSpeed Insights (Performance, Accessibility, Best Practices, SEO) on mobile.
 
-Every page includes a **"PageSpeed Me"** link in the footer that opens Google PageSpeed Insights for the current page. This provides radical transparency—you can verify our performance claims anytime with one click.
+Every page includes a **"PageSpeed Me"** link in the footer that opens Google PageSpeed Insights for the current page. This provides radical transparency — you can verify the score anytime with one click.
+
+### The two-step pattern that earned the perf 100
+
+A pure-SPA Vue (or React, Svelte) app typically caps around 96–98 on mobile PageSpeed even with good core web vitals, because nothing renders until JS executes the framework's mount — leaving 5–6 fully-blank filmstrip frames at the start of the load and dragging Speed Index. The fix is two coupled changes:
+
+1. **Static LCP skeleton inside the mount target.** [`index.html`](index.html) places a copy of HundredPeople's header block (same wrapper classes, same `<h1>`) inside `<div id="app">`. Vue's `mount('#app')` replaces innerHTML on mount, so the skeleton is purely an early-paint placeholder; the runtime markup swaps in with no visible flash. `aria-hidden="true"` on the skeleton wrapper prevents screen readers from announcing the h1 twice during the brief pre-mount window.
+
+2. **Inline the main CSS bundle.** [`vite.config.js`](vite.config.js)'s `inlineMainCssPlugin` runs in `transformIndexHtml.post` mode at build time: it locates the `assets/index-<hash>.css` asset, strips the auto-injected `<link rel="stylesheet">`, and injects the CSS content as `<style>` just before `</head>`. No external CSS request on the critical path — the browser can paint the styled skeleton as soon as the HTML byte stream is parsed. Route-specific CSS chunks (e.g. `HundredPeople-<hash>.css`) are NOT inlined — they stay lazily loaded by their route chunks.
+
+**Neither step works alone.** The skeleton without inlined CSS is invisible until the external CSS finishes downloading; the inline CSS without a skeleton leaves `#app` empty until Vue mounts. Together they shift the LCP paint to HTML-parse time, drop Speed Index from ~3.9 s to ~0.9 s, and fill the filmstrip from frame 1.
+
+[`public/_headers`](public/_headers) closes the repeat-visit gap with `Cache-Control: public, max-age=31536000, immutable` on `/assets/*` — Vite content-hashes filenames so the URL changes on every content change; the 1-year `immutable` combo skips revalidation entirely.
+
+Full diagnosis + before/after metrics: [`SESSION_LOG.md`](SESSION_LOG.md) Session 134.
 
 ## Browser Support
 
