@@ -60,7 +60,27 @@
     </script>
   </head>
   <body>
-    <div id="app"></div>
+    <!--
+      Static skeleton inside #app: paints as soon as CSS parses, which
+      happens ~1.5s earlier than Vue's first mount on mobile-throttled
+      cold loads. The h1 is the Lighthouse LCP element, so it pre-painting
+      drops LCP from 3000ms+ to roughly FCP-time. Vue replaces #app's
+      innerHTML on mount; the static content is purely an early-paint
+      placeholder that visually matches what HundredPeople.vue renders.
+      Keep the markup + classes in sync with HundredPeople.vue's header
+      block if either side changes.
+    -->
+    <div id="app">
+      <div class="min-h-screen flex flex-col" aria-hidden="true">
+        <main id="main-content" class="flex-1">
+          <div class="container mx-auto px-4 py-8 max-w-4xl">
+            <div class="text-center mb-8">
+              <h1 class="text-4xl font-bold mb-2 header-gradient">The World as 100 People</h1>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

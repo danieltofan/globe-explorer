@@ -173,7 +173,7 @@ function handleLegendKeydown(event, groupId) {
 
     <!-- Display Toggle (v1 dots vs v2 colored disc + silhouette icon) -->
     <div class="flex justify-center items-center gap-2 mb-4" role="group" aria-label="Display style">
-      <span class="text-sm text-base-content/70">Display:</span>
+      <span class="text-sm text-base-content/85">Display:</span>
       <button
         type="button"
         @click="useIcons = false"
